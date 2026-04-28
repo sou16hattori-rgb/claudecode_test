@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>Ocean Notes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+
+  <div class="ocean-bg">
+    <div class="stars"></div>
+    <div class="waves">
+      <div class="wave"></div>
+      <div class="wave wave2"></div>
+    </div>
+  </div>
+
+  <div class="container">
+    <header>
+      <span class="icon">📝</span>
+      <h1>OCEAN NOTES</h1>
+    </header>
+
+    <!-- 検索バー -->
+    <div class="search-wrap glass">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="メモを検索…" maxlength="100" />
+    </div>
+
+    <!-- メモ一覧 -->
+    <div class="notes-list" id="noteList"></div>
+
+    <!-- 新規メモ入力エリア -->
+    <div class="add-note glass">
+      <textarea id="noteInput" placeholder="新しいメモを入力…" maxlength="500" rows="3"></textarea>
+      <div class="add-footer">
+        <span class="char-count" id="charCount">0 / 500</span>
+        <button id="addBtn">追加</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
