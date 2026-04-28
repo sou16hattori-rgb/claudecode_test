@@ -6,35 +6,50 @@
   <title>アラームアプリ</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Noto+Sans+JP:wght@400;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Noto+Sans+JP:wght@300;400;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="bg-orbs">
-    <div class="orb orb1"></div>
-    <div class="orb orb2"></div>
-    <div class="orb orb3"></div>
+
+  <!-- Ocean background -->
+  <div class="ocean-bg">
+    <div class="stars"></div>
+    <div class="moon-glow"></div>
+    <div class="ocean-surface"></div>
+    <div class="waves">
+      <div class="wave"></div>
+      <div class="wave wave2"></div>
+    </div>
+    <div class="bubbles">
+      <div class="bubble"></div>
+      <div class="bubble"></div>
+      <div class="bubble"></div>
+      <div class="bubble"></div>
+      <div class="bubble"></div>
+    </div>
   </div>
 
   <div class="container">
     <header>
       <span class="icon-bell">🔔</span>
-      <h1>アラームアプリ</h1>
+      <h1>ALARM</h1>
     </header>
 
     <div class="clock-card">
       <div class="date-display" id="dateDisplay"></div>
       <div class="clock" id="clock">00:00:00</div>
-      <div class="clock-dots"></div>
+      <div class="clock-divider">
+        <span></span><span></span><span></span>
+      </div>
     </div>
 
     <section class="alarm-section">
-      <h2 class="section-title">登録済みアラーム</h2>
+      <p class="section-title">登録済みアラーム</p>
       <div class="alarms" id="alarmList"></div>
     </section>
 
     <div class="add-alarm glass">
-      <h2>+ アラームを追加</h2>
+      <h2>＋ &nbsp;アラームを追加</h2>
       <div class="input-row">
         <div class="input-group">
           <label>時刻</label>
@@ -45,16 +60,15 @@
           <input type="text" id="labelInput" placeholder="例：起床、薬など" maxlength="30" />
         </div>
       </div>
-      <button id="addBtn">
-        <span class="btn-icon">＋</span> アラームを追加
-      </button>
+      <button id="addBtn">追加する</button>
     </div>
   </div>
 
+  <!-- Alarm modal -->
   <div class="modal hidden" id="modal">
     <div class="modal-content glass">
       <div class="bell-anim">🔔</div>
-      <p class="modal-title">アラーム！</p>
+      <p class="modal-title">ALARM</p>
       <p id="modalMessage" class="modal-sub"></p>
       <button id="stopBtn">止める</button>
     </div>
