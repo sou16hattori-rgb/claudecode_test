@@ -1,4 +1,5 @@
 const clockEl = document.getElementById('clock');
+const dateEl = document.getElementById('dateDisplay');
 const alarmList = document.getElementById('alarmList');
 const timeInput = document.getElementById('timeInput');
 const labelInput = document.getElementById('labelInput');
@@ -6,6 +7,8 @@ const addBtn = document.getElementById('addBtn');
 const modal = document.getElementById('modal');
 const modalMessage = document.getElementById('modalMessage');
 const stopBtn = document.getElementById('stopBtn');
+
+const WEEKDAYS = ['日', '月', '火', '水', '木', '金', '土'];
 
 let alarms = loadAlarms();
 let audioCtx = null;
@@ -22,6 +25,9 @@ function tick() {
   const ss = String(now.getSeconds()).padStart(2, '0');
   clockEl.textContent = `${hh}:${mm}:${ss}`;
 
+  const wd = WEEKDAYS[now.getDay()];
+  dateEl.textContent = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日（${wd}）`;
+
   const key = `${hh}:${mm}`;
   if (ss === '00') {
     const alarm = alarms.find(a => a.enabled && a.time === key);
@@ -30,13 +36,11 @@ function tick() {
       triggerAlarm(alarm);
     }
   }
-  if (ss !== '00') {
-    lastTriggeredKey = null;
-  }
+  if (ss !== '00') lastTriggeredKey = null;
 }
 
 function triggerAlarm(alarm) {
-  modalMessage.textContent = alarm.label ? `${alarm.label} — ${alarm.time}` : `アラーム: ${alarm.time}`;
+  modalMessage.textContent = alarm.label ? `${alarm.label}  —  ${alarm.time}` : alarm.time;
   modal.classList.remove('hidden');
   startBeep();
 }
@@ -50,16 +54,16 @@ function startBeep() {
     gain.connect(audioCtx.destination);
     osc.type = 'sine';
     osc.frequency.setValueAtTime(880, audioCtx.currentTime);
-    gain.gain.setValueAtTime(0.6, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+    gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
     osc.start(audioCtx.currentTime);
-    osc.stop(audioCtx.currentTime + 0.4);
-  }, 600);
+    osc.stop(audioCtx.currentTime + 0.5);
+  }, 700);
 }
 
 function stopAlarm() {
   modal.classList.add('hidden');
-  if (beepInterval) clearInterval(beepInterval);
+  if (beepInterval) { clearInterval(beepInterval); beepInterval = null; }
   if (audioCtx) { audioCtx.close(); audioCtx = null; }
 }
 
@@ -78,7 +82,7 @@ addBtn.addEventListener('click', () => {
 function renderAlarms() {
   alarmList.innerHTML = '';
   if (alarms.length === 0) {
-    alarmList.innerHTML = '<p style="text-align:center;color:#666;">アラームがありません</p>';
+    alarmList.innerHTML = '<p class="empty-msg">アラームが登録されていません</p>';
     return;
   }
   alarms
@@ -88,9 +92,12 @@ function renderAlarms() {
       const item = document.createElement('div');
       item.className = 'alarm-item' + (alarm.enabled ? ' active' : '');
       item.innerHTML = `
-        <div>
-          <div class="alarm-time">${alarm.time}</div>
-          ${alarm.label ? `<div class="alarm-label">${escapeHtml(alarm.label)}</div>` : ''}
+        <div class="alarm-left">
+          <span class="alarm-icon">🔔</span>
+          <div>
+            <div class="alarm-time">${alarm.time}</div>
+            ${alarm.label ? `<div class="alarm-label">${escapeHtml(alarm.label)}</div>` : ''}
+          </div>
         </div>
         <div class="alarm-controls">
           <label class="toggle">

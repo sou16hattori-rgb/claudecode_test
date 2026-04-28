@@ -4,27 +4,58 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>アラームアプリ</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Noto+Sans+JP:wght@400;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <div class="bg-orbs">
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    <div class="orb orb3"></div>
+  </div>
+
   <div class="container">
-    <h1>アラームアプリ</h1>
+    <header>
+      <span class="icon-bell">🔔</span>
+      <h1>アラームアプリ</h1>
+    </header>
 
-    <div class="clock" id="clock">00:00:00</div>
+    <div class="clock-card">
+      <div class="date-display" id="dateDisplay"></div>
+      <div class="clock" id="clock">00:00:00</div>
+      <div class="clock-dots"></div>
+    </div>
 
-    <div class="alarms" id="alarmList"></div>
+    <section class="alarm-section">
+      <h2 class="section-title">登録済みアラーム</h2>
+      <div class="alarms" id="alarmList"></div>
+    </section>
 
-    <div class="add-alarm">
-      <h2>アラームを追加</h2>
-      <input type="time" id="timeInput" />
-      <input type="text" id="labelInput" placeholder="ラベル（任意）" maxlength="30" />
-      <button id="addBtn">追加</button>
+    <div class="add-alarm glass">
+      <h2>+ アラームを追加</h2>
+      <div class="input-row">
+        <div class="input-group">
+          <label>時刻</label>
+          <input type="time" id="timeInput" />
+        </div>
+        <div class="input-group flex1">
+          <label>ラベル（任意）</label>
+          <input type="text" id="labelInput" placeholder="例：起床、薬など" maxlength="30" />
+        </div>
+      </div>
+      <button id="addBtn">
+        <span class="btn-icon">＋</span> アラームを追加
+      </button>
     </div>
   </div>
 
   <div class="modal hidden" id="modal">
-    <div class="modal-content">
-      <p id="modalMessage">アラーム！</p>
+    <div class="modal-content glass">
+      <div class="bell-anim">🔔</div>
+      <p class="modal-title">アラーム！</p>
+      <p id="modalMessage" class="modal-sub"></p>
       <button id="stopBtn">止める</button>
     </div>
   </div>
