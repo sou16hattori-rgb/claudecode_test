@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>近くの図書館を探す | カーリル</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="library.css" />
+</head>
+<body>
+
+  <div class="bg-decoration">
+    <div class="bg-circle c1"></div>
+    <div class="bg-circle c2"></div>
+    <div class="bg-circle c3"></div>
+  </div>
+
+  <div class="container">
+    <header>
+      <div class="header-icon">📚</div>
+      <div>
+        <h1>図書館サーチ</h1>
+        <p class="header-sub">近くの図書館を探す</p>
+      </div>
+    </header>
+
+    <!-- 検索パネル -->
+    <section class="card search-panel">
+      <div class="search-tabs">
+        <button class="tab active" data-tab="geo">📍 現在地から探す</button>
+        <button class="tab" data-tab="pref">🗾 都道府県から探す</button>
+      </div>
+
+      <!-- 現在地タブ -->
+      <div class="tab-content active" id="tab-geo">
+        <p class="desc">GPSを使って現在地周辺の図書館を検索します。</p>
+        <div class="input-row">
+          <div class="input-group flex1">
+            <label>検索件数</label>
+            <select id="geoLimit">
+              <option value="5">5件</option>
+              <option value="10" selected>10件</option>
+              <option value="20">20件</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn-primary" id="geoSearchBtn">
+          <span>📍</span> 現在地で検索
+        </button>
+      </div>
+
+      <!-- 都道府県タブ -->
+      <div class="tab-content" id="tab-pref">
+        <p class="desc">都道府県・市区町村を指定して図書館を検索します。</p>
+        <div class="input-row">
+          <div class="input-group">
+            <label>都道府県</label>
+            <select id="prefSelect">
+              <option value="">選択してください</option>
+              <option>北海道</option><option>青森県</option><option>岩手県</option>
+              <option>宮城県</option><option>秋田県</option><option>山形県</option>
+              <option>福島県</option><option>茨城県</option><option>栃木県</option>
+              <option>群馬県</option><option>埼玉県</option><option>千葉県</option>
+              <option>東京都</option><option>神奈川県</option><option>新潟県</option>
+              <option>富山県</option><option>石川県</option><option>福井県</option>
+              <option>山梨県</option><option>長野県</option><option>岐阜県</option>
+              <option>静岡県</option><option>愛知県</option><option>三重県</option>
+              <option>滋賀県</option><option>京都府</option><option>大阪府</option>
+              <option>兵庫県</option><option>奈良県</option><option>和歌山県</option>
+              <option>鳥取県</option><option>島根県</option><option>岡山県</option>
+              <option>広島県</option><option>山口県</option><option>徳島県</option>
+              <option>香川県</option><option>愛媛県</option><option>高知県</option>
+              <option>福岡県</option><option>佐賀県</option><option>長崎県</option>
+              <option>熊本県</option><option>大分県</option><option>宮崎県</option>
+              <option>鹿児島県</option><option>沖縄県</option>
+            </select>
+          </div>
+          <div class="input-group flex1">
+            <label>市区町村（任意）</label>
+            <input type="text" id="cityInput" placeholder="例：渋谷区" />
+          </div>
+          <div class="input-group">
+            <label>件数</label>
+            <select id="prefLimit">
+              <option value="10" selected>10件</option>
+              <option value="20">20件</option>
+              <option value="50">50件</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn-primary" id="prefSearchBtn">
+          <span>🔍</span> 検索する
+        </button>
+      </div>
+    </section>
+
+    <!-- 蔵書検索パネル -->
+    <section class="card book-panel">
+      <h2>📖 蔵書・貸出状況を調べる <span class="optional-badge">オプション</span></h2>
+      <p class="desc">図書館を検索した後、ISBNを入力して蔵書の有無と貸出状況を確認できます。</p>
+      <div class="input-row">
+        <div class="input-group flex1">
+          <label>ISBN（13桁または10桁）</label>
+          <input type="text" id="isbnInput" placeholder="例：9784101010014" maxlength="13" />
+        </div>
+        <button class="btn-secondary" id="bookSearchBtn" disabled>
+          <span>📚</span> 蔵書を検索
+        </button>
+      </div>
+    </section>
+
+    <!-- ローディング -->
+    <div class="loading hidden" id="loading">
+      <div class="spinner"></div>
+      <p id="loadingMsg">図書館を検索中...</p>
+    </div>
+
+    <!-- エラー -->
+    <div class="error-box hidden" id="errorBox">
+      <span>⚠️</span> <span id="errorMsg"></span>
+    </div>
+
+    <!-- 結果 -->
+    <section id="resultsSection" class="hidden">
+      <div class="results-header">
+        <h2 id="resultsTitle">検索結果</h2>
+        <span class="results-count" id="resultsCount"></span>
+      </div>
+      <div id="libraryList" class="library-list"></div>
+    </section>
+
+    <footer>
+      図書館情報は <a href="https://calil.jp" target="_blank" rel="noopener">カーリル</a> のAPIを使用しています。
+    </footer>
+  </div>
+
+  <script src="library.js"></script>
+</body>
+</html>
