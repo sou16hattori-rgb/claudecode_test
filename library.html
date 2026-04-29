@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>近くの図書館を探す</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="library.css" />
+</head>
+<body>
+
+  <div class="bg-layer">
+    <div class="stars"></div>
+    <div class="gradient-orb orb1"></div>
+    <div class="gradient-orb orb2"></div>
+  </div>
+
+  <div class="container">
+    <header>
+      <span class="icon">📚</span>
+      <h1>近くの図書館</h1>
+      <p class="subtitle">CALIL 図書館APIで近隣の図書館を検索</p>
+    </header>
+
+    <!-- Location panel -->
+    <section class="card" id="locationPanel">
+      <p class="card-label">現在地</p>
+      <p id="locationText" class="location-text">位置情報を取得していません</p>
+      <button id="locateBtn" class="btn-primary">
+        <span class="btn-icon">📍</span> 現在地を取得して図書館を検索
+      </button>
+    </section>
+
+    <!-- Search status -->
+    <div id="statusMsg" class="status-msg hidden"></div>
+
+    <!-- Library results -->
+    <section id="librarySection" class="hidden">
+      <div class="section-header">
+        <p class="section-label">近隣の図書館</p>
+        <span id="libraryCount" class="badge"></span>
+      </div>
+      <div id="libraryList" class="library-list"></div>
+    </section>
+
+    <!-- Book search panel -->
+    <section class="card" id="bookPanel">
+      <p class="card-label">蔵書検索</p>
+      <p class="book-help">ISBN（13桁または10桁）を入力して、近くの図書館にある本を探せます</p>
+      <div class="book-input-row">
+        <input
+          type="text"
+          id="isbnInput"
+          class="isbn-input"
+          placeholder="例: 9784003105016"
+          maxlength="17"
+        />
+        <button id="searchBookBtn" class="btn-secondary" disabled>検索</button>
+      </div>
+      <p id="bookError" class="book-error hidden"></p>
+    </section>
+
+    <!-- Book results -->
+    <section id="bookResultSection" class="hidden">
+      <div class="section-header">
+        <p class="section-label">蔵書検索結果</p>
+        <span id="bookResultCount" class="badge"></span>
+      </div>
+      <div id="bookResultList" class="book-result-list"></div>
+    </section>
+
+  </div>
+
+  <script src="library.js"></script>
+</body>
+</html>
