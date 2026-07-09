@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>株式売買記録</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="app-header">
+  <h1>📈 株式売買記録</h1>
+  <div class="header-actions">
+    <button id="btn-export" class="btn ghost" title="全データをJSONファイルに保存">エクスポート</button>
+    <button id="btn-import" class="btn ghost" title="JSONファイルから復元">インポート</button>
+    <input type="file" id="import-file" accept=".json" hidden>
+  </div>
+</header>
+
+<div id="offline-notice" class="notice" hidden>
+  ⓘ 現在値・配当金の自動取得を使うには <code>node server.js</code> で起動し
+  <code>http://localhost:3456</code> を開いてください。銘柄名の自動表示・損益計算はこのままでも使えます。
+</div>
+
+<nav class="tabs">
+  <button class="tab active" data-tab="trades">取引履歴</button>
+  <button class="tab" data-tab="portfolio">保有銘柄</button>
+  <button class="tab" data-tab="dividends">配当金</button>
+  <button class="tab" data-tab="monthly">月次損益</button>
+</nav>
+
+<!-- ============ 取引履歴 ============ -->
+<section id="tab-trades" class="tab-panel active">
+  <form id="trade-form" class="card form-grid" autocomplete="off">
+    <h2 id="trade-form-title">取引を記録</h2>
+
+    <div class="field side-field">
+      <label>売買区分</label>
+      <div class="segmented">
+        <label><input type="radio" name="side" value="buy" checked><span>買い</span></label>
+        <label><input type="radio" name="side" value="sell"><span>売り</span></label>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="t-date">約定日</label>
+      <input type="date" id="t-date" required>
+    </div>
+
+    <div class="field">
+      <label for="t-code">銘柄コード</label>
+      <input type="text" id="t-code" placeholder="例: 7203" maxlength="5" required>
+    </div>
+
+    <div class="field wide">
+      <label for="t-name">銘柄名（コードから自動表示）</label>
+      <input type="text" id="t-name" placeholder="コードを入力すると自動で表示されます">
+      <div id="t-stockinfo" class="stock-info"></div>
+    </div>
+
+    <div class="field">
+      <label for="t-shares">株数</label>
+      <input type="number" id="t-shares" min="1" step="1" required>
+    </div>
+
+    <div class="field">
+      <label for="t-price">単価（円）</label>
+      <input type="number" id="t-price" min="0" step="0.1" required>
+    </div>
+
+    <div class="field">
+      <label for="t-fee">手数料（円）</label>
+      <input type="number" id="t-fee" min="0" step="1" value="0">
+    </div>
+
+    <div class="field buy-only">
+      <label for="t-horizon">投資期間</label>
+      <select id="t-horizon">
+        <option value="短期">短期</option>
+        <option value="中期">中期</option>
+        <option value="長期">長期</option>
+      </select>
+    </div>
+
+    <div class="field buy-only">
+      <label for="t-stoploss">損切ライン（円）</label>
+      <input type="number" id="t-stoploss" min="0" step="0.1" placeholder="任意">
+    </div>
+
+    <div class="field wide buy-only">
+      <label for="t-purpose">買う目的</label>
+      <input type="text" id="t-purpose" placeholder="例: 高配当狙い / 決算好調のため中期保有 など">
+    </div>
+
+    <div class="field wide">
+      <label for="t-memo">メモ</label>
+      <input type="text" id="t-memo" placeholder="任意">
+    </div>
+
+    <div class="form-actions wide">
+      <button type="submit" class="btn primary" id="trade-submit">記録する</button>
+      <button type="button" class="btn ghost" id="trade-cancel" hidden>編集をやめる</button>
+    </div>
+  </form>
+
+  <div class="card">
+    <h2>取引一覧</h2>
+    <div class="table-wrap">
+      <table id="trades-table">
+        <thead>
+          <tr>
+            <th>約定日</th><th>区分</th><th>コード</th><th>銘柄名</th>
+            <th class="num">株数</th><th class="num">単価</th><th class="num">手数料</th>
+            <th class="num">実現損益</th>
+            <th>期間</th><th class="num">損切</th><th>目的・メモ</th><th></th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p id="trades-empty" class="empty">まだ取引がありません。上のフォームから記録してください。</p>
+  </div>
+</section>
+
+<!-- ============ 保有銘柄 ============ -->
+<section id="tab-portfolio" class="tab-panel">
+  <div class="card">
+    <div class="card-head">
+      <h2>保有銘柄（移動平均法）</h2>
+      <button id="btn-refresh-all" class="btn ghost">現在値・配当を一括更新</button>
+    </div>
+    <div class="table-wrap">
+      <table id="portfolio-table">
+        <thead>
+          <tr>
+            <th>コード</th><th>銘柄名</th>
+            <th class="num">株数</th><th class="num">平均取得単価</th><th class="num">取得額</th>
+            <th class="num">現在値</th><th class="num">評価損益</th>
+            <th class="num">損切ライン</th><th>状態</th>
+            <th class="num">1株配当</th><th class="num">予想年間配当</th>
+            <th>期間</th><th>目的</th><th></th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p id="portfolio-empty" class="empty">現在保有中の銘柄はありません。</p>
+    <p class="hint">現在値・1株配当（直近1年の実績）はYahoo!ファイナンスの公開データから取得します。1株配当は行の「更新」で銘柄ごとに再取得できます。</p>
+  </div>
+</section>
+
+<!-- ============ 配当金 ============ -->
+<section id="tab-dividends" class="tab-panel">
+  <form id="div-form" class="card form-grid" autocomplete="off">
+    <h2>配当金を記録</h2>
+    <div class="field">
+      <label for="d-date">受取日</label>
+      <input type="date" id="d-date" required>
+    </div>
+    <div class="field">
+      <label for="d-code">銘柄コード</label>
+      <input type="text" id="d-code" placeholder="例: 7203" maxlength="5" required>
+    </div>
+    <div class="field wide">
+      <label for="d-name">銘柄名</label>
+      <input type="text" id="d-name" placeholder="自動表示">
+    </div>
+    <div class="field">
+      <label for="d-amount">受取額（円）</label>
+      <input type="number" id="d-amount" min="0" step="1" required>
+    </div>
+    <div class="field">
+      <label>&nbsp;</label>
+      <button type="button" class="btn ghost" id="btn-div-auto" title="保有株数 × 1株配当(半期分)で自動計算">自動計算</button>
+    </div>
+    <div class="field wide">
+      <label for="d-memo">メモ</label>
+      <input type="text" id="d-memo" placeholder="例: 中間配当 / 税引後 など">
+    </div>
+    <div class="form-actions wide">
+      <button type="submit" class="btn primary">記録する</button>
+    </div>
+  </form>
+
+  <div class="card">
+    <h2>配当金一覧</h2>
+    <div class="table-wrap">
+      <table id="div-table">
+        <thead>
+          <tr><th>受取日</th><th>コード</th><th>銘柄名</th><th class="num">受取額</th><th>メモ</th><th></th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p id="div-empty" class="empty">まだ配当金の記録がありません。</p>
+    <p class="hint">損益通算のため、譲渡損益と同じ基準（税引前）で記録するのがおすすめです。</p>
+  </div>
+</section>
+
+<!-- ============ 月次損益 ============ -->
+<section id="tab-monthly" class="tab-panel">
+  <div class="card">
+    <div class="card-head">
+      <h2>月次損益</h2>
+      <select id="year-select"></select>
+    </div>
+
+    <div class="stat-row" id="year-stats"></div>
+
+    <div class="chart-area">
+      <h3 class="chart-title">月別 合計損益（実現損益 + 配当金）</h3>
+      <div id="chart" class="chart"></div>
+      <div id="chart-tooltip" class="tooltip" hidden></div>
+    </div>
+
+    <div class="table-wrap">
+      <table id="monthly-table">
+        <thead>
+          <tr><th>月</th><th class="num">実現損益</th><th class="num">配当金</th><th class="num">合計</th><th class="num">累計</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p class="hint">実現損益は移動平均法（買付ごとに平均取得単価を更新）で計算しています。合計＝実現損益＋配当金（損益通算の目安）。</p>
+  </div>
+</section>
+
+<script src="stocks.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
