@@ -217,7 +217,65 @@ function renderSummary() {
   $("statStreak").innerHTML = (streak || "–") + "<small>日</small>";
 }
 
+/* ---- レベル & EXP ----
+   記録という「冒険の実績」からEXPを計算する。
+   食事記録 +10 / 運動記録 +25 / 目標カロリー内で1日を終えたら +30 */
+
+const EXP_MEAL = 10;
+const EXP_EXERCISE = 25;
+const EXP_GOAL_DAY = 30;
+
+const TIERS = [
+  { minLv: 15, cls: "tier-5", name: "けんじゃスライム" },
+  { minLv: 10, cls: "tier-4", name: "ゴールドスライム" },
+  { minLv: 6,  cls: "tier-3", name: "アイアンスライム" },
+  { minLv: 3,  cls: "tier-2", name: "スライム" },
+  { minLv: 1,  cls: "tier-1", name: "ぷちスライム" },
+];
+
+function computeExp() {
+  let exp = 0;
+  const todayKey = keyOfDate(today);
+  for (const key of Object.keys(records)) {
+    const r = records[key];
+    exp += (r.meals?.length || 0) * EXP_MEAL;
+    exp += (r.exercises?.length || 0) * EXP_EXERCISE;
+    // 目標内ボーナスは「終わった日」だけ(今日はまだ食べる可能性がある)
+    const t = mealTotal(key);
+    if (key < todayKey && r.meals?.length && t > 0 && t <= settings.goal) {
+      exp += EXP_GOAL_DAY;
+    }
+  }
+  return exp;
+}
+
+function xpForNext(lv) {
+  return 80 + (lv - 1) * 40; // Lv1→2は80、以降+40ずつ
+}
+
+function levelFromExp(exp) {
+  let lv = 1;
+  let rest = exp;
+  while (lv < 99 && rest >= xpForNext(lv)) {
+    rest -= xpForNext(lv);
+    lv++;
+  }
+  return { lv, into: rest, need: xpForNext(lv) };
+}
+
+function tierOf(lv) {
+  return TIERS.find((t) => lv >= t.minLv) || TIERS[TIERS.length - 1];
+}
+
 function renderAvatar() {
+  const { lv, into, need } = levelFromExp(computeExp());
+  const tier = tierOf(lv);
+
+  const slime = $("slime");
+  slime.classList.remove("state-fit", "state-chubby", "tier-1", "tier-2", "tier-3", "tier-4", "tier-5");
+  slime.classList.add(tier.cls);
+
+  // コンディション(直近7日の生活ぶり)
   const keys = lastNDays(7);
   const recorded = keys.filter(hasRecord).length;
   const overDays = keys.filter((k) => {
@@ -226,28 +284,37 @@ function renderAvatar() {
   }).length;
   const exCount = keys.filter((k) => dayRecord(k).exercises.length > 0).length;
 
-  const slime = $("slime");
-  slime.classList.remove("state-fit", "state-chubby");
-
-  let state, msg;
+  let msg;
   if (recorded >= 5 && overDays <= 1 && exCount >= 2) {
     slime.classList.add("state-fit");
-    state = "ひきしまりスライム";
-    msg = "絶好調!この調子で続けよう";
+    msg = "絶好調!今日も冒険(記録)に出よう";
   } else if (overDays >= 3) {
     slime.classList.add("state-chubby");
-    state = "ぽっちゃりスライム";
-    msg = "食べすぎが続いてるかも…今夜は軽めに";
+    msg = "食べすぎが続いてぽっちゃり気味…今夜は軽めに";
   } else if (recorded <= 1) {
     slime.classList.add("state-chubby");
-    state = "なまけスライム";
-    msg = "記録が止まってるよ。まずは今日の1食から";
+    msg = "冒険の記録が止まってるよ。まずは今日の1食から";
   } else {
-    state = "ふつうスライム";
-    msg = "記録を続けるとキャラが変化するよ";
+    msg = "記録するとEXPがたまり、スライムが進化するよ";
   }
-  $("avatarState").textContent = state;
+
+  $("avatarLv").textContent = `Lv ${lv}`;
+  $("avatarState").textContent = tier.name;
+  $("expFill").style.width = `${Math.min(100, Math.round((into / need) * 100))}%`;
+  $("expLabel").textContent = `EXP ${into} / ${need}`;
   $("avatarMsg").textContent = msg;
+
+  // レベルアップ演出
+  const lastLv = Number(localStorage.getItem("dg.lastLv") || 0);
+  if (lastLv && lv > lastLv) {
+    const prevTier = tierOf(lastLv);
+    if (prevTier.cls !== tier.cls) {
+      toast(`🎉 レベルアップ! ${tier.name} に しんかした!`);
+    } else {
+      toast(`🎉 レベルが ${lv} に あがった!`);
+    }
+  }
+  localStorage.setItem("dg.lastLv", String(lv));
 }
 
 /* ==================== 日詳細 ==================== */
@@ -516,7 +583,7 @@ $("mealForm").addEventListener("submit", async (e) => {
   saveRecords();
   closeSheet("mealOverlay");
   renderDay();
-  toast("食事を記録しました 🍽");
+  toast(`食事を記録した! +${EXP_MEAL} EXP 🍽`);
 });
 
 $("deleteMealBtn").addEventListener("click", async () => {
@@ -567,7 +634,7 @@ $("exForm").addEventListener("submit", (e) => {
   saveRecords();
   closeSheet("exOverlay");
   renderDay();
-  toast("運動を記録しました 🏃");
+  toast(`運動を記録した! +${EXP_EXERCISE} EXP 🏃`);
 });
 
 $("deleteExBtn").addEventListener("click", () => {
@@ -615,38 +682,58 @@ $("genBtn").addEventListener("click", async () => {
   }
 });
 
+function dayLine(key) {
+  const rec = dayRecord(key);
+  const parts = [];
+  if (rec.meals.length) {
+    for (const m of rec.meals) {
+      parts.push(`${m.slot}: ${m.items}${m.kcal ? `(約${m.kcal}kcal)` : ""}`);
+    }
+    parts.push(`合計 約${mealTotal(key)}kcal`);
+  } else {
+    parts.push("食事記録なし");
+  }
+  if (rec.exercises.length) {
+    for (const x of rec.exercises) {
+      parts.push(`運動: ${x.name}${x.minutes ? ` ${x.minutes}分` : ""}${x.kcal ? `(消費${x.kcal}kcal)` : ""}`);
+    }
+  } else {
+    parts.push("運動なし");
+  }
+  return parts.join(" / ");
+}
+
 function buildPrompt(baseKey) {
+  const total = mealTotal(baseKey);
+  const remaining = settings.goal - total;
+  const hour = new Date().getHours();
+  const timeNote = hour < 11 ? "いまは朝" : hour < 16 ? "いまは昼過ぎ" : "いまは夕方〜夜";
+
   const lines = [];
-  lines.push("あなたは私の専属栄養コーチです。以下の直近の記録をもとに、今日これからの食事(または明日)のアドバイスを3〜5行でください。励ましも一言添えてください。");
+  lines.push("あなたは私の専属の栄養・運動コーチです。下の記録を見て、【今日の残りの過ごし方】を具体的にアドバイスしてください。");
+  lines.push("必ず次の順で答えてください:");
+  lines.push("1. 今日の残りの食事プラン:何をどれくらい食べるか(コンビニやスーパーで買える具体例つきで)");
+  lines.push("2. 今日の運動プラン:種類・時間・強度を具体的に。すでに運動済みならストレッチや休養の提案でOK");
+  lines.push("3. 最後にひとこと励まし");
+  lines.push("");
+
+  const remainLabel = remaining >= 0
+    ? `目標まで残り 約${remaining}kcal`
+    : `目標を 約${-remaining}kcal オーバー中`;
+  lines.push(`【今日ここまで(${labelOfKey(baseKey)}・${timeNote})】${dayLine(baseKey)}`);
+  lines.push(`→ ${remainLabel}(1日の目標: ${settings.goal}kcal)`);
   lines.push("");
 
   const base = dateOfKey(baseKey);
-  for (let i = 2; i >= 0; i--) {
+  for (let i = 1; i <= 2; i++) {
     const d = new Date(base);
     d.setDate(d.getDate() - i);
     const key = keyOfDate(d);
-    const rec = dayRecord(key);
-    const parts = [];
-    if (rec.meals.length) {
-      for (const m of rec.meals) {
-        parts.push(`${m.slot}: ${m.items}${m.kcal ? `(約${m.kcal}kcal)` : ""}`);
-      }
-      parts.push(`合計 約${mealTotal(key)}kcal`);
-    } else {
-      parts.push("食事記録なし");
-    }
-    if (rec.exercises.length) {
-      for (const x of rec.exercises) {
-        parts.push(`運動: ${x.name}${x.minutes ? ` ${x.minutes}分` : ""}${x.kcal ? `(消費${x.kcal}kcal)` : ""}`);
-      }
-    } else {
-      parts.push("運動なし");
-    }
-    lines.push(`【${labelOfKey(key)}】` + parts.join(" / "));
+    lines.push(`【参考:${i === 1 ? "昨日" : "一昨日"}】${dayLine(key)}`);
   }
 
   lines.push("");
-  lines.push(`目標: 1日${settings.goal}kcal以内。中長期で無理なく減量したい。`);
+  lines.push("目標: 中長期で無理なく減量したい。極端な制限より続けられる提案を。");
   return lines.join("\n");
 }
 
