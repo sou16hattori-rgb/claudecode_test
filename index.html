@@ -3,76 +3,215 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>アラームアプリ</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Noto+Sans+JP:wght@300;400;600&display=swap" rel="stylesheet" />
+  <meta name="theme-color" content="#2e6e4e" />
+  <title>ダイエットギルド</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <!-- Ocean background -->
-  <div class="ocean-bg">
-    <div class="stars"></div>
-    <div class="moon-glow"></div>
-    <div class="ocean-surface"></div>
-    <div class="waves">
-      <div class="wave"></div>
-      <div class="wave wave2"></div>
-    </div>
-    <div class="bubbles">
-      <div class="bubble"></div>
-      <div class="bubble"></div>
-      <div class="bubble"></div>
-      <div class="bubble"></div>
-      <div class="bubble"></div>
-    </div>
-  </div>
+  <div class="app">
 
-  <div class="container">
-    <header>
-      <span class="icon-bell">🔔</span>
-      <h1>ALARM</h1>
+    <header class="app-head">
+      <div class="brand">ダイエット<span>ギルド</span></div>
+      <button class="icon-btn" id="settingsBtn" aria-label="設定">⚙️</button>
     </header>
 
-    <div class="clock-card">
-      <div class="date-display" id="dateDisplay"></div>
-      <div class="clock" id="clock">00:00:00</div>
-      <div class="clock-divider">
-        <span></span><span></span><span></span>
-      </div>
-    </div>
+    <!-- ============ カレンダー画面 ============ -->
+    <main class="screen" id="calScreen">
 
-    <section class="alarm-section">
-      <p class="section-title">登録済みアラーム</p>
-      <div class="alarms" id="alarmList"></div>
-    </section>
+      <!-- アバター -->
+      <section class="avatar-card" id="avatarCard">
+        <div class="slime-stage">
+          <div class="slime" id="slime">
+            <div class="slime-body">
+              <div class="eye left"></div>
+              <div class="eye right"></div>
+              <div class="mouth"></div>
+            </div>
+            <div class="slime-shadow"></div>
+          </div>
+        </div>
+        <div class="avatar-meta">
+          <div class="avatar-state" id="avatarState">ふつうスライム</div>
+          <p class="avatar-msg" id="avatarMsg">記録を続けるとキャラが変化するよ</p>
+        </div>
+      </section>
 
-    <div class="add-alarm glass">
-      <h2>＋ &nbsp;アラームを追加</h2>
-      <div class="input-row">
-        <div class="input-group">
-          <label>時刻</label>
-          <input type="time" id="timeInput" />
+      <!-- サマリー -->
+      <section class="summary">
+        <div class="stat">
+          <div class="label">直近7日平均</div>
+          <div class="val" id="statAvg">–<small>kcal</small></div>
         </div>
-        <div class="input-group flex1">
-          <label>ラベル（任意）</label>
-          <input type="text" id="labelInput" placeholder="例：起床、薬など" maxlength="30" />
+        <div class="stat">
+          <div class="label">運動(7日)</div>
+          <div class="val" id="statExercise">–<small>回</small></div>
         </div>
-      </div>
-      <button id="addBtn">追加する</button>
+        <div class="stat">
+          <div class="label">連続記録</div>
+          <div class="val" id="statStreak">–<small>日</small></div>
+        </div>
+      </section>
+
+      <!-- カレンダー -->
+      <section class="calendar">
+        <div class="cal-nav">
+          <button class="icon-btn" id="prevMonth" aria-label="前の月">‹</button>
+          <div class="cal-title" id="calTitle">2026年7月</div>
+          <button class="icon-btn" id="nextMonth" aria-label="次の月">›</button>
+        </div>
+        <div class="dow">
+          <div>日</div><div>月</div><div>火</div><div>水</div><div>木</div><div>金</div><div>土</div>
+        </div>
+        <div class="grid" id="calGrid"></div>
+        <div class="legend">
+          <span class="chip"><span class="sw sw-ok"></span>目標内</span>
+          <span class="chip"><span class="sw sw-over"></span>オーバー</span>
+          <span class="chip">🍽 食事 / 🏃 運動</span>
+        </div>
+      </section>
+    </main>
+
+    <!-- ============ 日詳細画面 ============ -->
+    <main class="screen" id="dayScreen" hidden>
+      <button class="back" id="backBtn">← カレンダーに戻る</button>
+      <p class="detail-date" id="detailDate"></p>
+      <p class="detail-sub" id="detailSub"></p>
+
+      <section class="card">
+        <div class="card-head">
+          <h3>食事の記録</h3>
+          <button class="mini-btn" id="addMealBtn">＋ 追加</button>
+        </div>
+        <div id="mealList" class="record-list"></div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h3>運動の記録</h3>
+          <button class="mini-btn" id="addExBtn">＋ 追加</button>
+        </div>
+        <div id="exList" class="record-list"></div>
+      </section>
+
+      <section class="card advice">
+        <h3>AIアドバイス</h3>
+        <p class="advice-text" id="adviceText">まだアドバイスはありません。</p>
+        <button class="btn" id="genBtn">✨ アドバイス用プロンプトを生成</button>
+        <button class="btn ghost" id="pasteAdviceBtn">Claudeの回答を貼り付けて保存</button>
+      </section>
+    </main>
+
+  </div>
+
+  <!-- ============ 食事入力シート ============ -->
+  <div class="overlay" id="mealOverlay">
+    <div class="sheet" role="dialog" aria-label="食事を記録">
+      <h2 id="mealSheetTitle">食事を記録</h2>
+      <form id="mealForm">
+        <label class="field">
+          <span>いつ</span>
+          <select id="mealSlot">
+            <option value="朝食">朝食</option>
+            <option value="昼食">昼食</option>
+            <option value="夕食">夕食</option>
+            <option value="間食">間食</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>食べたもの</span>
+          <input type="text" id="mealItems" placeholder="例:味噌ラーメン・餃子3個" required maxlength="100" />
+        </label>
+        <label class="field">
+          <span>カロリー(だいたいでOK)</span>
+          <input type="number" id="mealKcal" placeholder="800" min="0" max="5000" inputmode="numeric" />
+        </label>
+        <label class="field">
+          <span>写真(任意)</span>
+          <input type="file" id="mealPhoto" accept="image/*" />
+        </label>
+        <div class="photo-preview" id="photoPreview" hidden>
+          <img id="photoPreviewImg" alt="写真プレビュー" />
+        </div>
+        <div class="sheet-actions">
+          <button type="submit" class="btn">保存する</button>
+          <button type="button" class="btn ghost" data-close>キャンセル</button>
+          <button type="button" class="btn danger" id="deleteMealBtn" hidden>この記録を削除</button>
+        </div>
+      </form>
     </div>
   </div>
 
-  <!-- Alarm modal -->
-  <div class="modal hidden" id="modal">
-    <div class="modal-content glass">
-      <div class="bell-anim">🔔</div>
-      <p class="modal-title">ALARM</p>
-      <p id="modalMessage" class="modal-sub"></p>
-      <button id="stopBtn">止める</button>
+  <!-- ============ 運動入力シート ============ -->
+  <div class="overlay" id="exOverlay">
+    <div class="sheet" role="dialog" aria-label="運動を記録">
+      <h2 id="exSheetTitle">運動を記録</h2>
+      <form id="exForm">
+        <label class="field">
+          <span>内容</span>
+          <input type="text" id="exName" placeholder="例:ランニング 5km / ジム上半身" required maxlength="60" />
+        </label>
+        <label class="field">
+          <span>時間(分)</span>
+          <input type="number" id="exMinutes" placeholder="30" min="0" max="600" inputmode="numeric" />
+        </label>
+        <label class="field">
+          <span>消費カロリー(わかれば)</span>
+          <input type="number" id="exKcal" placeholder="300" min="0" max="3000" inputmode="numeric" />
+        </label>
+        <div class="sheet-actions">
+          <button type="submit" class="btn">保存する</button>
+          <button type="button" class="btn ghost" data-close>キャンセル</button>
+          <button type="button" class="btn danger" id="deleteExBtn" hidden>この記録を削除</button>
+        </div>
+      </form>
     </div>
   </div>
+
+  <!-- ============ プロンプトシート ============ -->
+  <div class="overlay" id="promptOverlay">
+    <div class="sheet" role="dialog" aria-label="プロンプト生成">
+      <h2>プロンプトを生成しました</h2>
+      <p class="hint">コピーしてClaude(いつものプロジェクト)に貼り付けてください。返ってきたアドバイスは「貼り付けて保存」で記録できます。</p>
+      <div class="prompt-box" id="promptBox"></div>
+      <div class="sheet-actions">
+        <button class="btn" id="copyPromptBtn">プロンプトをコピー</button>
+        <button class="btn ghost" data-close>閉じる</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ アドバイス貼り付けシート ============ -->
+  <div class="overlay" id="adviceOverlay">
+    <div class="sheet" role="dialog" aria-label="アドバイスを保存">
+      <h2>Claudeの回答を保存</h2>
+      <p class="hint">Claudeから返ってきたアドバイスをここに貼り付けると、この日の記録として残ります。</p>
+      <textarea id="adviceInput" rows="6" placeholder="ここに貼り付け"></textarea>
+      <div class="sheet-actions">
+        <button class="btn" id="saveAdviceBtn">保存する</button>
+        <button class="btn ghost" data-close>キャンセル</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 設定シート ============ -->
+  <div class="overlay" id="settingsOverlay">
+    <div class="sheet" role="dialog" aria-label="設定">
+      <h2>設定</h2>
+      <form id="settingsForm">
+        <label class="field">
+          <span>1日の目標カロリー</span>
+          <input type="number" id="goalInput" min="800" max="5000" inputmode="numeric" required />
+        </label>
+        <div class="sheet-actions">
+          <button type="submit" class="btn">保存する</button>
+          <button type="button" class="btn ghost" data-close>キャンセル</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status"></div>
 
   <script src="app.js"></script>
 </body>

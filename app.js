@@ -1,142 +1,606 @@
-const clockEl = document.getElementById('clock');
-const dateEl = document.getElementById('dateDisplay');
-const alarmList = document.getElementById('alarmList');
-const timeInput = document.getElementById('timeInput');
-const labelInput = document.getElementById('labelInput');
-const addBtn = document.getElementById('addBtn');
-const modal = document.getElementById('modal');
-const modalMessage = document.getElementById('modalMessage');
-const stopBtn = document.getElementById('stopBtn');
+/* ダイエットギルド — フェーズ1 (API無し・localStorage + IndexedDB) */
 
-const WEEKDAYS = ['日', '月', '火', '水', '木', '金', '土'];
+"use strict";
 
-let alarms = loadAlarms();
-let audioCtx = null;
-let beepInterval = null;
-let lastTriggeredKey = null;
+/* ==================== ストレージ ==================== */
 
-renderAlarms();
-setInterval(tick, 500);
+const STORE_RECORDS = "dg.records";
+const STORE_SETTINGS = "dg.settings";
 
-function tick() {
-  const now = new Date();
-  const hh = String(now.getHours()).padStart(2, '0');
-  const mm = String(now.getMinutes()).padStart(2, '0');
-  const ss = String(now.getSeconds()).padStart(2, '0');
-  clockEl.textContent = `${hh}:${mm}:${ss}`;
-
-  const wd = WEEKDAYS[now.getDay()];
-  dateEl.textContent = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日（${wd}）`;
-
-  const key = `${hh}:${mm}`;
-  if (ss === '00') {
-    const alarm = alarms.find(a => a.enabled && a.time === key);
-    if (alarm && lastTriggeredKey !== key) {
-      lastTriggeredKey = key;
-      triggerAlarm(alarm);
-    }
+function loadRecords() {
+  try {
+    return JSON.parse(localStorage.getItem(STORE_RECORDS)) || {};
+  } catch {
+    return {};
   }
-  if (ss !== '00') lastTriggeredKey = null;
+}
+function saveRecords() {
+  localStorage.setItem(STORE_RECORDS, JSON.stringify(records));
+}
+function loadSettings() {
+  try {
+    return { goal: 2000, ...(JSON.parse(localStorage.getItem(STORE_SETTINGS)) || {}) };
+  } catch {
+    return { goal: 2000 };
+  }
+}
+function saveSettings() {
+  localStorage.setItem(STORE_SETTINGS, JSON.stringify(settings));
 }
 
-function triggerAlarm(alarm) {
-  modalMessage.textContent = alarm.label ? `${alarm.label}  —  ${alarm.time}` : alarm.time;
-  modal.classList.remove('hidden');
-  startBeep();
+/* 写真は容量が大きいので IndexedDB に保存する */
+const photoDB = {
+  db: null,
+  open() {
+    return new Promise((resolve, reject) => {
+      if (this.db) return resolve(this.db);
+      const req = indexedDB.open("dg-photos", 1);
+      req.onupgradeneeded = () => req.result.createObjectStore("photos");
+      req.onsuccess = () => { this.db = req.result; resolve(this.db); };
+      req.onerror = () => reject(req.error);
+    });
+  },
+  async put(id, dataUrl) {
+    const db = await this.open();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction("photos", "readwrite");
+      tx.objectStore("photos").put(dataUrl, id);
+      tx.oncomplete = resolve;
+      tx.onerror = () => reject(tx.error);
+    });
+  },
+  async get(id) {
+    const db = await this.open();
+    return new Promise((resolve) => {
+      const req = db.transaction("photos").objectStore("photos").get(id);
+      req.onsuccess = () => resolve(req.result || null);
+      req.onerror = () => resolve(null);
+    });
+  },
+  async del(id) {
+    const db = await this.open();
+    return new Promise((resolve) => {
+      const tx = db.transaction("photos", "readwrite");
+      tx.objectStore("photos").delete(id);
+      tx.oncomplete = resolve;
+      tx.onerror = resolve;
+    });
+  },
+};
+
+/* ==================== 状態 ==================== */
+
+const records = loadRecords();   // { "2026-07-10": { meals: [], exercises: [], advice: "" } }
+const settings = loadSettings(); // { goal: 2000 }
+
+const today = new Date();
+let viewYear = today.getFullYear();
+let viewMonth = today.getMonth(); // 0-11
+let selectedKey = null;           // "2026-07-10"
+let editingMealId = null;
+let editingExId = null;
+let pendingPhoto = null;          // 圧縮済み dataURL (保存前)
+
+/* ==================== 日付ユーティリティ ==================== */
+
+const DOWS = ["日", "月", "火", "水", "木", "金", "土"];
+
+function keyOf(y, m, d) {
+  return `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+}
+function keyOfDate(date) {
+  return keyOf(date.getFullYear(), date.getMonth(), date.getDate());
+}
+function dateOfKey(key) {
+  const [y, m, d] = key.split("-").map(Number);
+  return new Date(y, m - 1, d);
+}
+function labelOfKey(key) {
+  const d = dateOfKey(key);
+  return `${d.getMonth() + 1}月${d.getDate()}日(${DOWS[d.getDay()]})`;
+}
+function dayRecord(key) {
+  return records[key] || { meals: [], exercises: [], advice: "" };
+}
+function ensureDay(key) {
+  if (!records[key]) records[key] = { meals: [], exercises: [], advice: "" };
+  return records[key];
+}
+function mealTotal(key) {
+  return dayRecord(key).meals.reduce((s, m) => s + (Number(m.kcal) || 0), 0);
+}
+function burnTotal(key) {
+  return dayRecord(key).exercises.reduce((s, e) => s + (Number(e.kcal) || 0), 0);
+}
+function hasRecord(key) {
+  const r = dayRecord(key);
+  return r.meals.length > 0 || r.exercises.length > 0;
+}
+function uid() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 }
 
-function startBeep() {
-  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  beepInterval = setInterval(() => {
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(880, audioCtx.currentTime);
-    gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
-    osc.start(audioCtx.currentTime);
-    osc.stop(audioCtx.currentTime + 0.5);
-  }, 700);
+/* ==================== 要素 ==================== */
+
+const $ = (id) => document.getElementById(id);
+const calScreen = $("calScreen");
+const dayScreen = $("dayScreen");
+
+/* ==================== カレンダー ==================== */
+
+function renderCalendar() {
+  $("calTitle").textContent = `${viewYear}年${viewMonth + 1}月`;
+  const grid = $("calGrid");
+  grid.innerHTML = "";
+
+  const firstDow = new Date(viewYear, viewMonth, 1).getDay();
+  const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+  const todayKey = keyOfDate(today);
+
+  for (let i = 0; i < firstDow; i++) {
+    const cell = document.createElement("div");
+    cell.className = "day empty";
+    grid.appendChild(cell);
+  }
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const key = keyOf(viewYear, viewMonth, d);
+    const cell = document.createElement("button");
+    cell.className = "day";
+    cell.type = "button";
+
+    const isFuture = key > todayKey;
+    if (key === todayKey) cell.classList.add("today");
+    if (isFuture) {
+      cell.classList.add("future");
+      cell.disabled = true;
+    }
+
+    let html = `<span class="num">${d}</span>`;
+    const rec = dayRecord(key);
+    const total = mealTotal(key);
+    if (rec.meals.length > 0 && total > 0) {
+      const ratio = total / settings.goal;
+      if (ratio > 1) cell.classList.add("over");
+      const width = Math.min(ratio, 1.2) / 1.2 * 100;
+      html += `<span class="kcal-bar"><i style="width:${width}%"></i></span>`;
+    }
+    const marks = (rec.meals.length ? "🍽" : "") + (rec.exercises.length ? "🏃" : "");
+    if (marks) html += `<span class="marks">${marks}</span>`;
+
+    cell.innerHTML = html;
+    if (!isFuture) cell.addEventListener("click", () => openDay(key));
+    grid.appendChild(cell);
+  }
 }
 
-function stopAlarm() {
-  modal.classList.add('hidden');
-  if (beepInterval) { clearInterval(beepInterval); beepInterval = null; }
-  if (audioCtx) { audioCtx.close(); audioCtx = null; }
-}
-
-stopBtn.addEventListener('click', stopAlarm);
-
-addBtn.addEventListener('click', () => {
-  const time = timeInput.value;
-  if (!time) { alert('時刻を選択してください'); return; }
-  alarms.push({ id: Date.now(), time, label: labelInput.value.trim(), enabled: true });
-  saveAlarms();
-  renderAlarms();
-  timeInput.value = '';
-  labelInput.value = '';
+$("prevMonth").addEventListener("click", () => {
+  viewMonth--;
+  if (viewMonth < 0) { viewMonth = 11; viewYear--; }
+  renderCalendar();
+});
+$("nextMonth").addEventListener("click", () => {
+  viewMonth++;
+  if (viewMonth > 11) { viewMonth = 0; viewYear++; }
+  renderCalendar();
 });
 
-function renderAlarms() {
-  alarmList.innerHTML = '';
-  if (alarms.length === 0) {
-    alarmList.innerHTML = '<p class="empty-msg">アラームが登録されていません</p>';
-    return;
+/* ==================== サマリー & アバター ==================== */
+
+function lastNDays(n, endDate = today) {
+  const keys = [];
+  for (let i = 0; i < n; i++) {
+    const d = new Date(endDate);
+    d.setDate(d.getDate() - i);
+    keys.push(keyOfDate(d));
   }
-  alarms
-    .slice()
-    .sort((a, b) => a.time.localeCompare(b.time))
-    .forEach(alarm => {
-      const item = document.createElement('div');
-      item.className = 'alarm-item' + (alarm.enabled ? ' active' : '');
-      item.innerHTML = `
-        <div class="alarm-left">
-          <span class="alarm-icon">🔔</span>
-          <div>
-            <div class="alarm-time">${alarm.time}</div>
-            ${alarm.label ? `<div class="alarm-label">${escapeHtml(alarm.label)}</div>` : ''}
-          </div>
-        </div>
-        <div class="alarm-controls">
-          <label class="toggle">
-            <input type="checkbox" ${alarm.enabled ? 'checked' : ''} data-id="${alarm.id}" />
-            <span class="slider"></span>
-          </label>
-          <button class="delete-btn" data-id="${alarm.id}" title="削除">✕</button>
-        </div>
-      `;
-      alarmList.appendChild(item);
-    });
+  return keys; // 新しい順
+}
 
-  alarmList.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-    cb.addEventListener('change', e => {
-      const id = Number(e.target.dataset.id);
-      const alarm = alarms.find(a => a.id === id);
-      if (alarm) { alarm.enabled = e.target.checked; saveAlarms(); renderAlarms(); }
-    });
+function renderSummary() {
+  const keys = lastNDays(7);
+  const eaten = keys.map(mealTotal).filter((v) => v > 0);
+  const avg = eaten.length ? Math.round(eaten.reduce((a, b) => a + b, 0) / eaten.length) : 0;
+  $("statAvg").innerHTML = (avg ? avg.toLocaleString() : "–") + "<small>kcal</small>";
+
+  const exCount = keys.filter((k) => dayRecord(k).exercises.length > 0).length;
+  $("statExercise").innerHTML = (exCount || "–") + "<small>回</small>";
+
+  let streak = 0;
+  const start = hasRecord(keyOfDate(today)) ? 0 : 1; // 今日未記録なら昨日から数える
+  for (let i = start; ; i++) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    if (hasRecord(keyOfDate(d))) streak++;
+    else break;
+  }
+  $("statStreak").innerHTML = (streak || "–") + "<small>日</small>";
+}
+
+function renderAvatar() {
+  const keys = lastNDays(7);
+  const recorded = keys.filter(hasRecord).length;
+  const overDays = keys.filter((k) => {
+    const t = mealTotal(k);
+    return t > 0 && t > settings.goal;
+  }).length;
+  const exCount = keys.filter((k) => dayRecord(k).exercises.length > 0).length;
+
+  const slime = $("slime");
+  slime.classList.remove("state-fit", "state-chubby");
+
+  let state, msg;
+  if (recorded >= 5 && overDays <= 1 && exCount >= 2) {
+    slime.classList.add("state-fit");
+    state = "ひきしまりスライム";
+    msg = "絶好調!この調子で続けよう";
+  } else if (overDays >= 3) {
+    slime.classList.add("state-chubby");
+    state = "ぽっちゃりスライム";
+    msg = "食べすぎが続いてるかも…今夜は軽めに";
+  } else if (recorded <= 1) {
+    slime.classList.add("state-chubby");
+    state = "なまけスライム";
+    msg = "記録が止まってるよ。まずは今日の1食から";
+  } else {
+    state = "ふつうスライム";
+    msg = "記録を続けるとキャラが変化するよ";
+  }
+  $("avatarState").textContent = state;
+  $("avatarMsg").textContent = msg;
+}
+
+/* ==================== 日詳細 ==================== */
+
+function openDay(key) {
+  selectedKey = key;
+  renderDay();
+  calScreen.hidden = true;
+  dayScreen.hidden = false;
+  window.scrollTo(0, 0);
+}
+
+$("backBtn").addEventListener("click", () => {
+  dayScreen.hidden = true;
+  calScreen.hidden = false;
+  refreshHome();
+});
+
+function renderDay() {
+  const rec = dayRecord(selectedKey);
+  $("detailDate").textContent = labelOfKey(selectedKey);
+
+  const total = mealTotal(selectedKey);
+  const burn = burnTotal(selectedKey);
+  $("detailSub").textContent =
+    `合計 ${total.toLocaleString()} kcal / 目標 ${settings.goal.toLocaleString()} kcal` +
+    (burn ? ` ・ 消費 ${burn.toLocaleString()} kcal` : "");
+
+  // 食事
+  const mealList = $("mealList");
+  mealList.innerHTML = "";
+  if (rec.meals.length === 0) {
+    mealList.innerHTML = `<div class="empty-note">まだ記録がありません。「＋ 追加」から記録しましょう。</div>`;
+  }
+  const slotEmoji = { 朝食: "🍳", 昼食: "🍜", 夕食: "🍚", 間食: "🍩" };
+  for (const meal of rec.meals) {
+    const row = document.createElement("button");
+    row.className = "meal";
+    row.type = "button";
+    row.innerHTML = `
+      <div class="photo">${slotEmoji[meal.slot] || "🍽"}</div>
+      <div class="meta">
+        <div class="name">${escapeHtml(meal.slot)}</div>
+        <div class="items">${escapeHtml(meal.items)}</div>
+      </div>
+      <div class="kcal">${meal.kcal ? Number(meal.kcal).toLocaleString() : "–"}<small> kcal</small></div>`;
+    if (meal.photoId) {
+      photoDB.get(meal.photoId).then((dataUrl) => {
+        if (dataUrl) {
+          row.querySelector(".photo").innerHTML = `<img src="${dataUrl}" alt="${escapeHtml(meal.slot)}の写真" />`;
+        }
+      });
+    }
+    row.addEventListener("click", () => openMealSheet(meal.id));
+    mealList.appendChild(row);
+  }
+
+  // 運動
+  const exList = $("exList");
+  exList.innerHTML = "";
+  if (rec.exercises.length === 0) {
+    exList.innerHTML = `<div class="empty-note">まだ記録がありません。</div>`;
+  }
+  for (const ex of rec.exercises) {
+    const row = document.createElement("button");
+    row.className = "ex-row";
+    row.type = "button";
+    const label = `🏃 ${escapeHtml(ex.name)}` + (ex.minutes ? `(${ex.minutes}分)` : "");
+    const burnLabel = ex.kcal ? `-${Number(ex.kcal).toLocaleString()} kcal` : "";
+    row.innerHTML = `<span>${label}</span><span class="burn">${burnLabel}</span>`;
+    row.addEventListener("click", () => openExSheet(ex.id));
+    exList.appendChild(row);
+  }
+
+  // アドバイス
+  $("adviceText").textContent = rec.advice || "まだアドバイスはありません。";
+}
+
+function escapeHtml(s) {
+  return String(s ?? "")
+    .replaceAll("&", "&amp;").replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;").replaceAll('"', "&quot;");
+}
+
+/* ==================== シート共通 ==================== */
+
+function openSheet(id) { $(id).classList.add("open"); }
+function closeSheet(id) { $(id).classList.remove("open"); }
+
+document.querySelectorAll(".overlay").forEach((ov) => {
+  ov.addEventListener("click", (e) => { if (e.target === ov) ov.classList.remove("open"); });
+  ov.querySelectorAll("[data-close]").forEach((btn) => {
+    btn.addEventListener("click", () => ov.classList.remove("open"));
   });
+});
 
-  alarmList.querySelectorAll('.delete-btn').forEach(btn => {
-    btn.addEventListener('click', e => {
-      const id = Number(e.target.dataset.id);
-      alarms = alarms.filter(a => a.id !== id);
-      saveAlarms();
-      renderAlarms();
-    });
+let toastTimer;
+function toast(msg) {
+  const el = $("toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("show"), 1800);
+}
+
+/* ==================== 食事の記録 ==================== */
+
+$("addMealBtn").addEventListener("click", () => openMealSheet(null));
+
+function openMealSheet(mealId) {
+  editingMealId = mealId;
+  pendingPhoto = null;
+  const form = $("mealForm");
+  form.reset();
+  $("photoPreview").hidden = true;
+  $("deleteMealBtn").hidden = !mealId;
+  $("mealSheetTitle").textContent = mealId ? "食事の記録を編集" : "食事を記録";
+
+  if (mealId) {
+    const meal = dayRecord(selectedKey).meals.find((m) => m.id === mealId);
+    if (meal) {
+      $("mealSlot").value = meal.slot;
+      $("mealItems").value = meal.items;
+      $("mealKcal").value = meal.kcal || "";
+      if (meal.photoId) {
+        photoDB.get(meal.photoId).then((dataUrl) => {
+          if (dataUrl) {
+            $("photoPreviewImg").src = dataUrl;
+            $("photoPreview").hidden = false;
+          }
+        });
+      }
+    }
+  } else {
+    // 時間帯から初期値を推測
+    const h = new Date().getHours();
+    $("mealSlot").value = h < 10 ? "朝食" : h < 15 ? "昼食" : h < 21 ? "夕食" : "間食";
+  }
+  openSheet("mealOverlay");
+}
+
+$("mealPhoto").addEventListener("change", async (e) => {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+  try {
+    pendingPhoto = await compressImage(file, 512, 0.7);
+    $("photoPreviewImg").src = pendingPhoto;
+    $("photoPreview").hidden = false;
+  } catch {
+    toast("写真の読み込みに失敗しました");
+  }
+});
+
+function compressImage(file, maxSize, quality) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+      resolve(canvas.toDataURL("image/jpeg", quality));
+    };
+    img.onerror = reject;
+    img.src = url;
   });
 }
 
-function escapeHtml(str) {
-  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+$("mealForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const rec = ensureDay(selectedKey);
+  let meal;
+  if (editingMealId) {
+    meal = rec.meals.find((m) => m.id === editingMealId);
+  } else {
+    meal = { id: uid() };
+    rec.meals.push(meal);
+  }
+  meal.slot = $("mealSlot").value;
+  meal.items = $("mealItems").value.trim();
+  meal.kcal = $("mealKcal").value ? Number($("mealKcal").value) : null;
+
+  if (pendingPhoto) {
+    const photoId = meal.photoId || uid();
+    await photoDB.put(photoId, pendingPhoto);
+    meal.photoId = photoId;
+  }
+  saveRecords();
+  closeSheet("mealOverlay");
+  renderDay();
+  toast("食事を記録しました 🍽");
+});
+
+$("deleteMealBtn").addEventListener("click", async () => {
+  const rec = ensureDay(selectedKey);
+  const meal = rec.meals.find((m) => m.id === editingMealId);
+  if (meal && meal.photoId) await photoDB.del(meal.photoId);
+  rec.meals = rec.meals.filter((m) => m.id !== editingMealId);
+  saveRecords();
+  closeSheet("mealOverlay");
+  renderDay();
+  toast("記録を削除しました");
+});
+
+/* ==================== 運動の記録 ==================== */
+
+$("addExBtn").addEventListener("click", () => openExSheet(null));
+
+function openExSheet(exId) {
+  editingExId = exId;
+  const form = $("exForm");
+  form.reset();
+  $("deleteExBtn").hidden = !exId;
+  $("exSheetTitle").textContent = exId ? "運動の記録を編集" : "運動を記録";
+  if (exId) {
+    const ex = dayRecord(selectedKey).exercises.find((x) => x.id === exId);
+    if (ex) {
+      $("exName").value = ex.name;
+      $("exMinutes").value = ex.minutes || "";
+      $("exKcal").value = ex.kcal || "";
+    }
+  }
+  openSheet("exOverlay");
 }
 
-function saveAlarms() {
-  localStorage.setItem('alarms', JSON.stringify(alarms));
+$("exForm").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const rec = ensureDay(selectedKey);
+  let ex;
+  if (editingExId) {
+    ex = rec.exercises.find((x) => x.id === editingExId);
+  } else {
+    ex = { id: uid() };
+    rec.exercises.push(ex);
+  }
+  ex.name = $("exName").value.trim();
+  ex.minutes = $("exMinutes").value ? Number($("exMinutes").value) : null;
+  ex.kcal = $("exKcal").value ? Number($("exKcal").value) : null;
+  saveRecords();
+  closeSheet("exOverlay");
+  renderDay();
+  toast("運動を記録しました 🏃");
+});
+
+$("deleteExBtn").addEventListener("click", () => {
+  const rec = ensureDay(selectedKey);
+  rec.exercises = rec.exercises.filter((x) => x.id !== editingExId);
+  saveRecords();
+  closeSheet("exOverlay");
+  renderDay();
+  toast("記録を削除しました");
+});
+
+/* ==================== プロンプト生成 ==================== */
+
+$("genBtn").addEventListener("click", () => {
+  $("promptBox").textContent = buildPrompt(selectedKey);
+  openSheet("promptOverlay");
+});
+
+function buildPrompt(baseKey) {
+  const lines = [];
+  lines.push("あなたは私の専属栄養コーチです。以下の直近の記録をもとに、今日これからの食事(または明日)のアドバイスを3〜5行でください。励ましも一言添えてください。");
+  lines.push("");
+
+  const base = dateOfKey(baseKey);
+  for (let i = 2; i >= 0; i--) {
+    const d = new Date(base);
+    d.setDate(d.getDate() - i);
+    const key = keyOfDate(d);
+    const rec = dayRecord(key);
+    const parts = [];
+    if (rec.meals.length) {
+      for (const m of rec.meals) {
+        parts.push(`${m.slot}: ${m.items}${m.kcal ? `(約${m.kcal}kcal)` : ""}`);
+      }
+      parts.push(`合計 約${mealTotal(key)}kcal`);
+    } else {
+      parts.push("食事記録なし");
+    }
+    if (rec.exercises.length) {
+      for (const x of rec.exercises) {
+        parts.push(`運動: ${x.name}${x.minutes ? ` ${x.minutes}分` : ""}${x.kcal ? `(消費${x.kcal}kcal)` : ""}`);
+      }
+    } else {
+      parts.push("運動なし");
+    }
+    lines.push(`【${labelOfKey(key)}】` + parts.join(" / "));
+  }
+
+  lines.push("");
+  lines.push(`目標: 1日${settings.goal}kcal以内。中長期で無理なく減量したい。`);
+  return lines.join("\n");
 }
 
-function loadAlarms() {
-  try { return JSON.parse(localStorage.getItem('alarms')) || []; }
-  catch { return []; }
+$("copyPromptBtn").addEventListener("click", async () => {
+  const text = $("promptBox").textContent;
+  try {
+    await navigator.clipboard.writeText(text);
+    toast("コピーしました。Claudeに貼り付けてください ✨");
+  } catch {
+    // クリップボードAPIが使えない環境向けフォールバック
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand("copy");
+    ta.remove();
+    toast("コピーしました ✨");
+  }
+});
+
+/* ==================== アドバイス保存 ==================== */
+
+$("pasteAdviceBtn").addEventListener("click", () => {
+  $("adviceInput").value = dayRecord(selectedKey).advice || "";
+  openSheet("adviceOverlay");
+});
+
+$("saveAdviceBtn").addEventListener("click", () => {
+  const text = $("adviceInput").value.trim();
+  ensureDay(selectedKey).advice = text;
+  saveRecords();
+  closeSheet("adviceOverlay");
+  renderDay();
+  if (text) toast("アドバイスを保存しました 📝");
+});
+
+/* ==================== 設定 ==================== */
+
+$("settingsBtn").addEventListener("click", () => {
+  $("goalInput").value = settings.goal;
+  openSheet("settingsOverlay");
+});
+
+$("settingsForm").addEventListener("submit", (e) => {
+  e.preventDefault();
+  settings.goal = Number($("goalInput").value) || 2000;
+  saveSettings();
+  closeSheet("settingsOverlay");
+  refreshHome();
+  toast("設定を保存しました");
+});
+
+/* ==================== 起動 ==================== */
+
+function refreshHome() {
+  renderCalendar();
+  renderSummary();
+  renderAvatar();
 }
+
+refreshHome();
