@@ -1,0 +1,11 @@
+name = "habit-guild-api"
+main = "worker.js"
+compatibility_date = "2026-01-01"
+
+# 任意: 許可するサイトのURLを指定するとより安全です。
+# GitHub Pages を使う場合は自分のPagesのURLに置き換えてください。
+# [vars]
+# ALLOWED_ORIGIN = "https://sou16hattori-rgb.github.io"
+
+# ANTHROPIC_API_KEY と APP_TOKEN は wrangler secret put で登録します
+# (このファイルには秘密の値を書かないこと)

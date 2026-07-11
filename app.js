@@ -285,9 +285,15 @@ function renderDay() {
 
   const total = mealTotal(selectedKey);
   const burn = burnTotal(selectedKey);
+  const p = pfcTotal(selectedKey, "p");
+  const f = pfcTotal(selectedKey, "f");
+  const c = pfcTotal(selectedKey, "c");
+  const pfcLine = (p || f || c)
+    ? ` ・ P${Math.round(p)} F${Math.round(f)} C${Math.round(c)}`
+    : "";
   $("detailSub").textContent =
     `合計 ${total.toLocaleString()} kcal / 目標 ${settings.goal.toLocaleString()} kcal` +
-    (burn ? ` ・ 消費 ${burn.toLocaleString()} kcal` : "");
+    (burn ? ` ・ 消費 ${burn.toLocaleString()} kcal` : "") + pfcLine;
 
   // 食事
   const mealList = $("mealList");
@@ -300,11 +306,15 @@ function renderDay() {
     const row = document.createElement("button");
     row.className = "meal";
     row.type = "button";
+    const pfc = (meal.p != null || meal.f != null || meal.c != null)
+      ? `<div class="pfc">P ${fmtG(meal.p)} ・ F ${fmtG(meal.f)} ・ C ${fmtG(meal.c)}</div>`
+      : "";
     row.innerHTML = `
       <div class="photo">${slotEmoji[meal.slot] || "🍽"}</div>
       <div class="meta">
         <div class="name">${escapeHtml(meal.slot)}</div>
         <div class="items">${escapeHtml(meal.items)}</div>
+        ${pfc}
       </div>
       <div class="kcal">${meal.kcal ? Number(meal.kcal).toLocaleString() : "–"}<small> kcal</small></div>`;
     if (meal.photoId) {
@@ -337,6 +347,15 @@ function renderDay() {
 
   // アドバイス
   $("adviceText").textContent = rec.advice || "まだアドバイスはありません。";
+  updateAdviceUI();
+}
+
+function fmtG(v) {
+  return v == null ? "–" : `${round1(v)}g`;
+}
+
+function pfcTotal(key, macro) {
+  return dayRecord(key).meals.reduce((s, m) => s + (Number(m[macro]) || 0), 0);
 }
 
 function escapeHtml(s) {
@@ -385,6 +404,9 @@ function openMealSheet(mealId) {
       $("mealSlot").value = meal.slot;
       $("mealItems").value = meal.items;
       $("mealKcal").value = meal.kcal || "";
+      $("mealP").value = meal.p ?? "";
+      $("mealF").value = meal.f ?? "";
+      $("mealC").value = meal.c ?? "";
       if (meal.photoId) {
         photoDB.get(meal.photoId).then((dataUrl) => {
           if (dataUrl) {
@@ -432,6 +454,43 @@ function compressImage(file, maxSize, quality) {
   });
 }
 
+/* AIでカロリー・PFCを推定 */
+$("estimateBtn").addEventListener("click", async () => {
+  if (!backend.configured()) {
+    toast("先に設定(⚙️)でAI連携を登録してください");
+    return;
+  }
+  const text = $("mealItems").value.trim();
+  if (!text && !pendingPhoto) {
+    toast("食べたものか写真を入力してください");
+    return;
+  }
+  const btn = $("estimateBtn");
+  const original = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = "推定中…";
+  try {
+    const r = await backend.estimate({ text, image: pendingPhoto });
+    if (r.kcal != null) $("mealKcal").value = Math.round(r.kcal);
+    if (r.protein_g != null) $("mealP").value = round1(r.protein_g);
+    if (r.fat_g != null) $("mealF").value = round1(r.fat_g);
+    if (r.carbs_g != null) $("mealC").value = round1(r.carbs_g);
+    if (!text && Array.isArray(r.items) && r.items.length) {
+      $("mealItems").value = r.items.join("・").slice(0, 100);
+    }
+    toast("推定しました。必要なら手直しできます ✨");
+  } catch (err) {
+    toast("推定に失敗: " + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = original;
+  }
+});
+
+function round1(n) {
+  return Math.round(Number(n) * 10) / 10;
+}
+
 $("mealForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const rec = ensureDay(selectedKey);
@@ -445,6 +504,9 @@ $("mealForm").addEventListener("submit", async (e) => {
   meal.slot = $("mealSlot").value;
   meal.items = $("mealItems").value.trim();
   meal.kcal = $("mealKcal").value ? Number($("mealKcal").value) : null;
+  meal.p = $("mealP").value ? Number($("mealP").value) : null;
+  meal.f = $("mealF").value ? Number($("mealF").value) : null;
+  meal.c = $("mealC").value ? Number($("mealC").value) : null;
 
   if (pendingPhoto) {
     const photoId = meal.photoId || uid();
@@ -519,9 +581,38 @@ $("deleteExBtn").addEventListener("click", () => {
 
 /* ==================== プロンプト生成 ==================== */
 
-$("genBtn").addEventListener("click", () => {
-  $("promptBox").textContent = buildPrompt(selectedKey);
-  openSheet("promptOverlay");
+/* バックエンドの有無でアドバイスUIを切り替え */
+function updateAdviceUI() {
+  const online = backend.configured();
+  $("genBtn").textContent = online ? "✨ AIアドバイスをもらう" : "✨ アドバイス用プロンプトを生成";
+  $("pasteAdviceBtn").hidden = online; // オンライン時はコピペ不要
+  $("estimateBtn").hidden = !online;
+  $("estimateHint").hidden = online;
+}
+
+$("genBtn").addEventListener("click", async () => {
+  if (!backend.configured()) {
+    // フェーズ1フォールバック:プロンプトをコピー
+    $("promptBox").textContent = buildPrompt(selectedKey);
+    openSheet("promptOverlay");
+    return;
+  }
+  const btn = $("genBtn");
+  const original = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = "考え中…";
+  try {
+    const r = await backend.advice(buildPrompt(selectedKey));
+    ensureDay(selectedKey).advice = r.text;
+    saveRecords();
+    renderDay();
+    toast("アドバイスが届きました 🎉");
+  } catch (err) {
+    toast("取得に失敗: " + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = original;
+  }
 });
 
 function buildPrompt(baseKey) {
@@ -596,13 +687,37 @@ $("saveAdviceBtn").addEventListener("click", () => {
 
 $("settingsBtn").addEventListener("click", () => {
   $("goalInput").value = settings.goal;
+  const b = backend.cfg();
+  $("backendUrl").value = b.url;
+  $("backendToken").value = b.token;
   openSheet("settingsOverlay");
+});
+
+$("testBackendBtn").addEventListener("click", async () => {
+  const url = $("backendUrl").value.trim();
+  const token = $("backendToken").value.trim();
+  if (!url) { toast("URLを入力してください"); return; }
+  backend.save(url, token); // ping前に一時保存
+  const btn = $("testBackendBtn");
+  btn.disabled = true;
+  const original = btn.textContent;
+  btn.textContent = "テスト中…";
+  try {
+    await backend.ping();
+    toast("接続OK ✅");
+  } catch (err) {
+    toast("接続失敗: " + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = original;
+  }
 });
 
 $("settingsForm").addEventListener("submit", (e) => {
   e.preventDefault();
   settings.goal = Number($("goalInput").value) || 2000;
   saveSettings();
+  backend.save($("backendUrl").value, $("backendToken").value);
   closeSheet("settingsOverlay");
   refreshHome();
   toast("設定を保存しました");

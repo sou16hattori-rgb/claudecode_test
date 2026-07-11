@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#2e6e4e" />
-  <title>ダイエットギルド</title>
+  <title>ハビットギルド</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -12,7 +12,7 @@
   <div class="app">
 
     <header class="app-head">
-      <div class="brand">ダイエット<span>ギルド</span></div>
+      <div class="brand">ハビット<span>ギルド</span></div>
       <button class="icon-btn" id="settingsBtn" aria-label="設定">⚙️</button>
     </header>
 
@@ -135,16 +135,35 @@
           <input type="text" id="mealItems" placeholder="例:味噌ラーメン・餃子3個" required maxlength="100" />
         </label>
         <label class="field">
-          <span>カロリー(だいたいでOK)</span>
-          <input type="number" id="mealKcal" placeholder="800" min="0" max="5000" inputmode="numeric" />
-        </label>
-        <label class="field">
           <span>写真(任意)</span>
           <input type="file" id="mealPhoto" accept="image/*" />
         </label>
         <div class="photo-preview" id="photoPreview" hidden>
           <img id="photoPreviewImg" alt="写真プレビュー" />
         </div>
+
+        <button type="button" class="btn estimate" id="estimateBtn">✨ AIでカロリー・PFCを推定</button>
+        <p class="estimate-hint" id="estimateHint" hidden>接続設定をすると使えます(⚙️から設定)</p>
+
+        <label class="field">
+          <span>カロリー(だいたいでOK)</span>
+          <input type="number" id="mealKcal" placeholder="800" min="0" max="5000" inputmode="numeric" />
+        </label>
+        <div class="pfc-inputs">
+          <label class="field">
+            <span>P(たんぱく質g)</span>
+            <input type="number" id="mealP" placeholder="–" min="0" max="500" step="any" inputmode="decimal" />
+          </label>
+          <label class="field">
+            <span>F(脂質g)</span>
+            <input type="number" id="mealF" placeholder="–" min="0" max="500" step="any" inputmode="decimal" />
+          </label>
+          <label class="field">
+            <span>C(炭水化物g)</span>
+            <input type="number" id="mealC" placeholder="–" min="0" max="500" step="any" inputmode="decimal" />
+          </label>
+        </div>
+
         <div class="sheet-actions">
           <button type="submit" class="btn">保存する</button>
           <button type="button" class="btn ghost" data-close>キャンセル</button>
@@ -215,6 +234,21 @@
           <span>1日の目標カロリー</span>
           <input type="number" id="goalInput" min="800" max="5000" inputmode="numeric" required />
         </label>
+
+        <div class="settings-section">
+          <h3>AI連携(任意)</h3>
+          <p class="hint">中継サーバーを立てると、写真・テキストからのカロリー/PFC自動推定とアプリ内アドバイスが使えます。未設定でもコピペ方式で使えます。</p>
+          <label class="field">
+            <span>中継サーバーのURL</span>
+            <input type="url" id="backendUrl" placeholder="https://xxxx.workers.dev" inputmode="url" />
+          </label>
+          <label class="field">
+            <span>アクセストークン</span>
+            <input type="text" id="backendToken" placeholder="自分で決めた合言葉" autocomplete="off" />
+          </label>
+          <button type="button" class="btn ghost" id="testBackendBtn">接続テスト</button>
+        </div>
+
         <div class="sheet-actions">
           <button type="submit" class="btn">保存する</button>
           <button type="button" class="btn ghost" data-close>キャンセル</button>
@@ -225,6 +259,7 @@
 
   <div class="toast" id="toast" role="status"></div>
 
+  <script src="api.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

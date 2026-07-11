@@ -403,6 +403,39 @@ body {
 }
 .sheet textarea { resize: vertical; }
 
+.btn.estimate {
+  background: var(--accent);
+  margin-bottom: 6px;
+}
+.btn.estimate:disabled { opacity: .6; }
+.estimate-hint { font-size: 11px; color: var(--muted); margin: 0 0 12px; text-align: center; }
+
+.pfc-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+}
+.pfc-inputs .field span { font-size: 11px; }
+
+.meal .pfc {
+  font-size: 10px;
+  color: var(--primary);
+  font-variant-numeric: tabular-nums;
+  margin-top: 1px;
+}
+
+.settings-section {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+.settings-section h3 {
+  margin: 0 0 4px;
+  font-size: 13px;
+  color: var(--ink);
+  font-weight: 700;
+}
+
 .photo-preview { margin-bottom: 12px; }
 .photo-preview img {
   width: 96px; height: 96px;
