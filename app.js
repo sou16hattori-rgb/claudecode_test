@@ -266,6 +266,19 @@ $("backBtn").addEventListener("click", () => {
   refreshHome();
 });
 
+/* カレンダー画面から今日の記録をワンタップで開始 */
+function quickAddToday(kind) {
+  selectedKey = keyOfDate(today);
+  renderDay();
+  calScreen.hidden = true;
+  dayScreen.hidden = false;
+  window.scrollTo(0, 0);
+  if (kind === "meal") openMealSheet(null);
+  else openExSheet(null);
+}
+$("quickMealBtn").addEventListener("click", () => quickAddToday("meal"));
+$("quickExBtn").addEventListener("click", () => quickAddToday("ex"));
+
 function renderDay() {
   const rec = dayRecord(selectedKey);
   $("detailDate").textContent = labelOfKey(selectedKey);
