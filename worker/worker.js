@@ -60,7 +60,9 @@ export default {
       }
       return json({ error: "unknown action" }, 400, cors);
     } catch (err) {
-      return json({ error: String(err && err.message || err) }, 502, cors);
+      const message = String(err && err.message || err);
+      console.error("habit-guild-api error:", message);
+      return json({ error: message }, 502, cors);
     }
   },
 };
