@@ -13,7 +13,7 @@
  */
 
 // 使うモデル。Sonnetレベルで十分との方針。コスト重視なら "claude-haiku-4-5" に変更可。
-const MODEL = "claude-sonnet-5";
+const MODEL = "cclaude-haiku-4-5";
 const ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";
 const ANTHROPIC_VERSION = "2023-06-01";
 
