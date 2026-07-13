@@ -490,6 +490,16 @@ body {
   margin-bottom: 6px;
 }
 .estimate-hint { font-size: 11px; color: var(--muted); margin: 0 0 12px; text-align: center; }
+.accuracy-note {
+  margin: 10px 0 0;
+  font-size: 11px;
+  color: var(--blue);
+  line-height: 1.6;
+  background: var(--bg-deep);
+  border: 1.5px solid var(--line-dim);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
 
 .pfc-inputs {
   display: grid;

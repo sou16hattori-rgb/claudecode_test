@@ -84,10 +84,22 @@ async function estimate(body, env) {
     additionalProperties: false,
   };
 
-  const instruction =
+  let instruction =
     "あなたは管理栄養士です。日本の一般的な一人前を基準に、食事のカロリー(kcal)とPFC" +
     "(たんぱく質・脂質・炭水化物、グラム)を推定してください。写真がある場合は写っている量から" +
     "見積もり、items に推定した品目を日本語で入れてください。推定はあくまで目安で構いません。";
+
+  // このユーザーの過去の実測補正をfew-shot例として与え、一人前の感覚を合わせる
+  if (Array.isArray(body.examples) && body.examples.length) {
+    const lines = body.examples
+      .filter((e) => e && e.input && e.kcal != null)
+      .map((e) => `・「${e.input}」→ 実際は ${e.kcal}kcal, P${e.protein_g ?? "?"} F${e.fat_g ?? "?"} C${e.carbs_g ?? "?"}`)
+      .join("\n");
+    if (lines) {
+      instruction +=
+        "\n\nこのユーザーの過去の実測データ(あなたの推定より優先して一人前の感覚を合わせること):\n" + lines;
+    }
+  }
 
   const content = [];
   if (body.image) {

@@ -1,4 +1,4 @@
-/* ダイエットギルド — フェーズ1 (API無し・localStorage + IndexedDB) */
+/* ハビットクエスト — フロント本体 (localStorage + IndexedDB) */
 
 "use strict";
 
@@ -6,6 +6,7 @@
 
 const STORE_RECORDS = "dg.records";
 const STORE_SETTINGS = "dg.settings";
+const STORE_CORRECTIONS = "dg.corrections";
 
 function loadRecords() {
   try {
@@ -26,6 +27,46 @@ function loadSettings() {
 }
 function saveSettings() {
   localStorage.setItem(STORE_SETTINGS, JSON.stringify(settings));
+}
+
+/* AI推定のフィードバック(ユーザーの手直しを実測データとして蓄積) */
+function loadCorrections() {
+  try {
+    return JSON.parse(localStorage.getItem(STORE_CORRECTIONS)) || [];
+  } catch {
+    return [];
+  }
+}
+function saveCorrections() {
+  // 直近100件だけ保持
+  localStorage.setItem(STORE_CORRECTIONS, JSON.stringify(corrections.slice(-100)));
+}
+function recordCorrection(ai, final) {
+  if (final.kcal == null) return; // カロリー未確定なら記録しない
+  corrections.push({ ts: Date.now(), input: ai.input || "", ai, final });
+  saveCorrections();
+}
+/* カロリー推定の精度統計(|実測 - 推定| / 推定) */
+function estimateStats() {
+  const withKcal = corrections.filter((c) => c.ai.kcal > 0 && c.final.kcal != null);
+  if (!withKcal.length) return null;
+  const errs = withKcal.map((c) => Math.abs(c.final.kcal - c.ai.kcal) / c.ai.kcal);
+  const avgErr = Math.round((errs.reduce((a, b) => a + b, 0) / errs.length) * 100);
+  const within = errs.filter((e) => e <= 0.15).length;
+  return { used: withKcal.length, avgErr, within };
+}
+/* 直近の手直しをfew-shot例として渡す(この人の一人前をAIに学ばせる) */
+function correctionExamples() {
+  return corrections
+    .filter((c) => c.input && c.final.kcal != null)
+    .slice(-3)
+    .map((c) => ({
+      input: c.input,
+      kcal: c.final.kcal,
+      protein_g: c.final.p,
+      fat_g: c.final.f,
+      carbs_g: c.final.c,
+    }));
 }
 
 /* 写真は容量が大きいので IndexedDB に保存する */
@@ -72,6 +113,7 @@ const photoDB = {
 
 const records = loadRecords();   // { "2026-07-10": { meals: [], exercises: [], advice: "" } }
 const settings = loadSettings(); // { goal: 2000 }
+const corrections = loadCorrections(); // AI推定の手直し履歴
 
 const today = new Date();
 let viewYear = today.getFullYear();
@@ -80,6 +122,7 @@ let selectedKey = null;           // "2026-07-10"
 let editingMealId = null;
 let editingExId = null;
 let pendingPhoto = null;          // 圧縮済み dataURL (保存前)
+let pendingEstimate = null;       // 直近のAI推定値(保存時に手直し差分を記録)
 
 /* ==================== 日付ユーティリティ ==================== */
 
@@ -459,6 +502,7 @@ $("addMealBtn").addEventListener("click", () => openMealSheet(null));
 function openMealSheet(mealId) {
   editingMealId = mealId;
   pendingPhoto = null;
+  pendingEstimate = null;
   const form = $("mealForm");
   form.reset();
   $("photoPreview").hidden = true;
@@ -537,7 +581,7 @@ $("estimateBtn").addEventListener("click", async () => {
   btn.disabled = true;
   btn.textContent = "推定中…";
   try {
-    const r = await backend.estimate({ text, image: pendingPhoto });
+    const r = await backend.estimate({ text, image: pendingPhoto, examples: correctionExamples() });
     if (r.kcal != null) $("mealKcal").value = Math.round(r.kcal);
     if (r.protein_g != null) $("mealP").value = round1(r.protein_g);
     if (r.fat_g != null) $("mealF").value = round1(r.fat_g);
@@ -545,7 +589,15 @@ $("estimateBtn").addEventListener("click", async () => {
     if (!text && Array.isArray(r.items) && r.items.length) {
       $("mealItems").value = r.items.join("・").slice(0, 100);
     }
-    toast("推定しました。必要なら手直しできます ✨");
+    // AIの提案を控えておき、保存時に手直しされたか比較する
+    pendingEstimate = {
+      input: $("mealItems").value.trim(),
+      kcal: r.kcal != null ? Math.round(r.kcal) : null,
+      p: r.protein_g != null ? round1(r.protein_g) : null,
+      f: r.fat_g != null ? round1(r.fat_g) : null,
+      c: r.carbs_g != null ? round1(r.carbs_g) : null,
+    };
+    toast("推定しました。手直しすると精度が上がります ✨");
   } catch (err) {
     toast("推定に失敗: " + err.message);
   } finally {
@@ -580,6 +632,13 @@ $("mealForm").addEventListener("submit", async (e) => {
     await photoDB.put(photoId, pendingPhoto);
     meal.photoId = photoId;
   }
+
+  // AI推定を使っていたら、最終値を実測データとして記録(手直しの有無を問わず)
+  if (pendingEstimate) {
+    recordCorrection(pendingEstimate, { kcal: meal.kcal, p: meal.p, f: meal.f, c: meal.c });
+    pendingEstimate = null;
+  }
+
   saveRecords();
   closeSheet("mealOverlay");
   renderDay();
@@ -777,6 +836,18 @@ $("settingsBtn").addEventListener("click", () => {
   const b = backend.cfg();
   $("backendUrl").value = b.url;
   $("backendToken").value = b.token;
+
+  // AI推定の精度サマリー
+  const stats = estimateStats();
+  const note = $("accuracyNote");
+  if (stats) {
+    note.hidden = false;
+    note.textContent =
+      `AI推定を ${stats.used} 回使用 / 平均誤差 ±${stats.avgErr}%(カロリー)` +
+      ` ・ ±15%以内 ${stats.within} 回。手直しは次回の推定に反映されます。`;
+  } else {
+    note.hidden = true;
+  }
   openSheet("settingsOverlay");
 });
 

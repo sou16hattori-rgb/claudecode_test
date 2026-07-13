@@ -49,8 +49,8 @@ const backend = {
   ping() {
     return this.call({ action: "ping" }, { timeout: 10000 });
   },
-  estimate({ text, image }) {
-    return this.call({ action: "estimate", text, image });
+  estimate({ text, image, examples }) {
+    return this.call({ action: "estimate", text, image, examples });
   },
   advice(prompt) {
     return this.call({ action: "advice", prompt });
