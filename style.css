@@ -3,21 +3,26 @@
    ダーク単一テーマ。パネルは .rpg ウィンドウ風の二重枠で統一する。 */
 
 :root {
-  --bg: #0d1126;
-  --bg-deep: #080b1a;
-  --panel: #151a33;
-  --panel2: #1d2342;
-  --ink: #eef1ff;
-  --muted: #9aa3c7;
-  --line: rgba(238, 241, 255, 0.85);
-  --line-dim: rgba(238, 241, 255, 0.22);
-  --gold: #f5c33b;
-  --gold-deep: #c99a1d;
-  --blue: #58a6e8;
-  --ok: #4ec97a;
-  --danger: #e05e5e;
-  --exp: linear-gradient(90deg, #f5c33b, #ffe08a);
-  --shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
+  /* ドラクエの戦闘フィールド風:明るい草原+空。パネルは視認性重視で紺のコマンドウィンドウ */
+  --sky: #8fd0f0;
+  --grass-far: #7fc94a;
+  --grass-near: #4fa32a;
+  --panel: #12204a;         /* 定番の紺色コマンドウィンドウ */
+  --panel2: #1c2d5e;
+  --bg-deep: #0c1838;
+  --ink: #ffffff;
+  --muted: #c3cde8;
+  --ink-dark: #16351a;      /* 明るい面に載せる濃い文字 */
+  --muted-dark: #3f6b3a;
+  --line: rgba(255, 255, 255, 0.92);
+  --line-dim: rgba(255, 255, 255, 0.28);
+  --gold: #ffd24a;
+  --gold-deep: #d99f1d;
+  --blue: #7cc0f5;
+  --ok: #57d074;
+  --danger: #ff7a6b;
+  --exp: linear-gradient(90deg, #ffd24a, #fff0a8);
+  --shadow: 0 8px 22px rgba(20, 50, 20, 0.30);
   --font-dot: "DotGothic16", "Hiragino Kaku Gothic ProN", sans-serif;
 }
 
@@ -25,14 +30,33 @@
 
 body {
   margin: 0;
+  /* 上=空、下=草原。fixedで画面全体をフィールドに */
   background:
-    radial-gradient(ellipse 90% 50% at 50% -10%, #1b2150 0%, transparent 60%),
-    var(--bg);
+    linear-gradient(180deg,
+      var(--sky) 0%,
+      #a9dd7a 34%,
+      var(--grass-far) 46%,
+      var(--grass-near) 100%);
+  background-attachment: fixed;
   color: var(--ink);
   font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Noto Sans JP", "Yu Gothic UI", system-ui, sans-serif;
   line-height: 1.65;
   -webkit-font-smoothing: antialiased;
 }
+/* ふわっと浮かぶ雲 */
+body::before {
+  content: "";
+  position: fixed;
+  top: 5%; left: 0; right: 0;
+  height: 60px;
+  background:
+    radial-gradient(closest-side, rgba(255,255,255,.9), transparent) 12% 40% / 90px 34px no-repeat,
+    radial-gradient(closest-side, rgba(255,255,255,.8), transparent) 70% 20% / 120px 42px no-repeat,
+    radial-gradient(closest-side, rgba(255,255,255,.75), transparent) 45% 70% / 70px 28px no-repeat;
+  pointer-events: none;
+  z-index: 0;
+}
+.app { position: relative; z-index: 1; }
 
 .app {
   max-width: 480px;
@@ -62,7 +86,12 @@ body {
   font-family: var(--font-dot);
   font-size: 19px;
   letter-spacing: .06em;
-  text-shadow: 0 2px 0 rgba(0, 0, 0, .6);
+  color: #fff;
+  /* 明るいフィールドでも読めるようDQロゴ風の濃い縁取り */
+  text-shadow:
+    -1.5px -1.5px 0 #12351a, 1.5px -1.5px 0 #12351a,
+    -1.5px 1.5px 0 #12351a, 1.5px 1.5px 0 #12351a,
+    0 3px 0 rgba(0, 0, 0, .25);
 }
 .brand span { color: var(--gold); }
 .icon-btn {
@@ -97,12 +126,13 @@ body {
 }
 .slime-stage {
   width: 92px; height: 92px; flex: none; position: relative;
+  /* スライムが草原に立っているように */
   background:
-    radial-gradient(ellipse 60% 22% at 50% 88%, rgba(0,0,0,.5), transparent 70%),
-    linear-gradient(180deg, #232a52 0%, #171c38 100%);
+    radial-gradient(ellipse 55% 20% at 50% 90%, rgba(0,0,0,.18), transparent 70%),
+    linear-gradient(180deg, #bfe8f5 0%, #bfe8f5 42%, #7fc94a 42%, #4fa32a 100%);
   border: 2px solid var(--line-dim);
   border-radius: 8px;
-  overflow: visible;
+  overflow: hidden;
 }
 .slime {
   position: absolute; inset: 0;
@@ -355,21 +385,34 @@ body {
 
 /* ---------- day detail ---------- */
 .back {
-  background: none; border: none;
-  color: var(--gold);
-  font: inherit; font-size: 13px;
+  /* 明るい地面に載るので小さなコマンドウィンドウ風に */
+  background: var(--panel);
+  border: 2px solid var(--line);
+  color: #fff;
+  font: inherit; font-size: 12px;
   cursor: pointer;
-  padding: 0;
+  padding: 4px 10px;
+  border-radius: 7px;
   align-self: flex-start;
   font-family: var(--font-dot);
 }
 .detail-date {
   font-family: var(--font-dot);
-  font-size: 18px;
+  font-size: 19px;
   margin: 0;
   letter-spacing: .04em;
+  color: #fff;
+  text-shadow:
+    -1.5px -1.5px 0 #12351a, 1.5px -1.5px 0 #12351a,
+    -1.5px 1.5px 0 #12351a, 1.5px 1.5px 0 #12351a;
 }
-.detail-sub { font-size: 12px; color: var(--muted); margin: -8px 0 0; }
+.detail-sub {
+  font-size: 12px;
+  color: #123318;
+  font-weight: 600;
+  margin: -6px 0 0;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, .35);
+}
 
 .card {
   background: var(--panel);
