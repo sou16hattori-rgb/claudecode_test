@@ -1,7 +1,12 @@
 # 中継サーバー(Cloudflare Worker)のデプロイ手順
 
-このフォルダは、ハビットギルドのアプリから Claude API を安全に呼ぶための
+このフォルダは、ギャルコーチのアプリから Claude API を安全に呼ぶための
 「中継サーバー」です。APIキーはここ(Cloudflare)にだけ保管し、アプリ本体には置きません。
+
+> ⚠️ `wrangler.toml` の Worker 名 `habit-guild-api` は**変更しないでください**。
+> すでにデプロイ済みの Worker にAPIキーなどのシークレットが紐づいているため、
+> 名前を変えると別の Worker が新規作成され、シークレットが無い状態になります
+> (アプリ名だけが変わり、Worker名は当時のまま、という状態です)。
 
 ```
 スマホのアプリ  →  この中継サーバー(Cloudflare Worker)  →  Claude API

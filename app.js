@@ -1,4 +1,4 @@
-/* ハビットクエスト — フロント本体 (localStorage + IndexedDB) */
+/* ギャルコーチ — フロント本体 (localStorage + IndexedDB) */
 
 "use strict";
 
@@ -260,8 +260,8 @@ function renderSummary() {
   $("statStreak").innerHTML = (streak || "–") + "<small>日</small>";
 }
 
-/* ---- レベル & EXP ----
-   記録という「冒険の実績」からEXPを計算する。
+/* ---- なかよし度(レベル & EXP) ----
+   記録するほどギャルと仲良くなり、見た目が派手になっていく。
    食事記録 +10 / 運動記録 +25 / 目標カロリー内で1日を終えたら +30 */
 
 const EXP_MEAL = 10;
@@ -269,11 +269,11 @@ const EXP_EXERCISE = 25;
 const EXP_GOAL_DAY = 30;
 
 const TIERS = [
-  { minLv: 15, cls: "tier-5", name: "けんじゃスライム" },
-  { minLv: 10, cls: "tier-4", name: "ゴールドスライム" },
-  { minLv: 6,  cls: "tier-3", name: "アイアンスライム" },
-  { minLv: 3,  cls: "tier-2", name: "スライム" },
-  { minLv: 1,  cls: "tier-1", name: "ぷちスライム" },
+  { minLv: 15, cls: "tier-5", name: "伝説のギャル" },
+  { minLv: 10, cls: "tier-4", name: "カリスマギャル" },
+  { minLv: 6,  cls: "tier-3", name: "イケイケギャル" },
+  { minLv: 3,  cls: "tier-2", name: "ふつうのギャル" },
+  { minLv: 1,  cls: "tier-1", name: "見習いギャル" },
 ];
 
 function computeExp() {
@@ -310,15 +310,24 @@ function tierOf(lv) {
   return TIERS.find((t) => lv >= t.minLv) || TIERS[TIERS.length - 1];
 }
 
+/* 直近でギャルがつけた点数(なければ null) */
+function latestScore() {
+  for (const key of lastNDays(3)) {
+    const s = dayRecord(key).score;
+    if (typeof s === "number") return s;
+  }
+  return null;
+}
+
 function renderAvatar() {
   const { lv, into, need } = levelFromExp(computeExp());
   const tier = tierOf(lv);
 
-  const slime = $("slime");
-  slime.classList.remove("state-fit", "state-chubby", "tier-1", "tier-2", "tier-3", "tier-4", "tier-5");
-  slime.classList.add(tier.cls);
+  const gal = $("gal");
+  gal.className = "gal"; // 一旦リセット
+  gal.classList.add(tier.cls);
 
-  // コンディション(直近7日の生活ぶり)
+  // 直近7日の生活ぶり
   const keys = lastNDays(7);
   const recorded = keys.filter(hasRecord).length;
   const overDays = keys.filter((k) => {
@@ -327,24 +336,53 @@ function renderAvatar() {
   }).length;
   const exCount = keys.filter((k) => dayRecord(k).exercises.length > 0).length;
 
-  let msg;
-  if (recorded >= 5 && overDays <= 1 && exCount >= 2) {
-    slime.classList.add("state-fit");
-    msg = "絶好調!今日も冒険(記録)に出よう";
+  // 体型:食べすぎが続くとぽっちゃり、節制+運動でスリム
+  let bodyCls;
+  if (overDays >= 4) bodyCls = "body-chubby";
+  else if (overDays <= 1 && exCount >= 2 && recorded >= 3) bodyCls = "body-slim";
+  else bodyCls = "body-normal";
+  gal.classList.add(bodyCls);
+
+  // 表情:ギャルの判定スコア優先。なければ記録状況から推定
+  const score = latestScore();
+  let mood, msg;
+  if (score != null) {
+    if (score >= 80) {
+      mood = "mood-happy";
+      msg = `${score}点!まじ神バランスじゃん✨ その調子でいこ〜`;
+    } else if (score >= 60) {
+      mood = "mood-smile";
+      msg = `${score}点、いい感じじゃん😊 あとちょいで神いける`;
+    } else if (score >= 40) {
+      mood = "mood-worried";
+      msg = `${score}点…うーん、ちょい崩れてるかも🥺 立て直そ`;
+    } else {
+      mood = "mood-angry";
+      msg = `${score}点!?ちょっと〜、さすがに食べすぎじゃん💢`;
+    }
+  } else if (Object.keys(records).length === 0) {
+    // 初回起動はウェルカムムード
+    mood = "mood-happy";
+    msg = "はじめまして💖 とりあえず今日食べたもの入れてみて!";
+  } else if (recorded >= 5 && overDays <= 1) {
+    mood = "mood-happy";
+    msg = "記録えらすぎ✨ この調子でキープしよ〜";
   } else if (overDays >= 3) {
-    slime.classList.add("state-chubby");
-    msg = "食べすぎが続いてぽっちゃり気味…今夜は軽めに";
-  } else if (recorded <= 1) {
-    slime.classList.add("state-chubby");
-    msg = "冒険の記録が止まってるよ。まずは今日の1食から";
+    mood = "mood-worried";
+    msg = "最近食べすぎ続いてるっぽい🥺 今日は軽めにいこ";
+  } else if (recorded === 0) {
+    mood = "mood-angry";
+    msg = "最近サボってるじゃん💢 まずは1食からいこ?";
   } else {
-    msg = "記録するとEXPがたまり、スライムが進化するよ";
+    mood = "mood-smile";
+    msg = "記録するとギャルと仲良くなれるよ💅";
   }
+  gal.classList.add(mood);
 
   $("avatarLv").textContent = `Lv ${lv}`;
   $("avatarState").textContent = tier.name;
   $("expFill").style.width = `${Math.min(100, Math.round((into / need) * 100))}%`;
-  $("expLabel").textContent = `EXP ${into} / ${need}`;
+  $("expLabel").textContent = `なかよし度 ${into} / ${need}`;
   $("avatarMsg").textContent = msg;
 
   // レベルアップ演出
@@ -352,9 +390,9 @@ function renderAvatar() {
   if (lastLv && lv > lastLv) {
     const prevTier = tierOf(lastLv);
     if (prevTier.cls !== tier.cls) {
-      toast(`🎉 レベルアップ! ${tier.name} に しんかした!`);
+      toast(`🎉 Lv${lv}! ${tier.name} にランクアップ💖`);
     } else {
-      toast(`🎉 レベルが ${lv} に あがった!`);
+      toast(`🎉 なかよし度 Lv${lv} になった✨`);
     }
   }
   localStorage.setItem("dg.lastLv", String(lv));
@@ -455,8 +493,18 @@ function renderDay() {
     exList.appendChild(row);
   }
 
-  // アドバイス
-  $("adviceText").textContent = rec.advice || "まだアドバイスはありません。";
+  // ギャルの判定
+  const badge = $("scoreBadge");
+  if (typeof rec.score === "number") {
+    badge.hidden = false;
+    badge.className = "score" + (rec.score < 40 ? " low" : rec.score < 60 ? " mid" : "");
+    $("scoreVal").textContent = rec.score;
+  } else {
+    badge.hidden = true;
+  }
+  $("adviceHeadline").hidden = !rec.headline;
+  $("adviceHeadline").textContent = rec.headline || "";
+  $("adviceText").textContent = rec.advice || "まだ判定してもらってないよ〜";
   updateAdviceUI();
 }
 
@@ -573,7 +621,7 @@ $("estimateBtn").addEventListener("click", async () => {
   }
   const text = $("mealItems").value.trim();
   if (!text && !pendingPhoto) {
-    toast("食べたものか写真を入力してください");
+    toast("食べたものか写真いれて〜🙏");
     return;
   }
   const btn = $("estimateBtn");
@@ -597,7 +645,7 @@ $("estimateBtn").addEventListener("click", async () => {
       f: r.fat_g != null ? round1(r.fat_g) : null,
       c: r.carbs_g != null ? round1(r.carbs_g) : null,
     };
-    toast("推定しました。手直しすると精度が上がります ✨");
+    toast("推定したよ〜✨ 違ってたら直して!");
   } catch (err) {
     toast("推定に失敗: " + err.message);
   } finally {
@@ -653,7 +701,7 @@ $("deleteMealBtn").addEventListener("click", async () => {
   saveRecords();
   closeSheet("mealOverlay");
   renderDay();
-  toast("記録を削除しました");
+  toast("消しといたよ🗑");
 });
 
 /* ==================== 運動の記録 ==================== */
@@ -702,15 +750,15 @@ $("deleteExBtn").addEventListener("click", () => {
   saveRecords();
   closeSheet("exOverlay");
   renderDay();
-  toast("記録を削除しました");
+  toast("消しといたよ🗑");
 });
 
 /* ==================== プロンプト生成 ==================== */
 
-/* バックエンドの有無でアドバイスUIを切り替え */
+/* バックエンドの有無でUIを切り替え */
 function updateAdviceUI() {
   const online = backend.configured();
-  $("genBtn").textContent = online ? "✨ AIアドバイスをもらう" : "✨ アドバイス用プロンプトを生成";
+  $("genBtn").textContent = online ? "💖 ギャルに判定してもらう" : "💖 判定用プロンプトを作る";
   $("pasteAdviceBtn").hidden = online; // オンライン時はコピペ不要
   $("estimateBtn").hidden = !online;
   $("estimateHint").hidden = online;
@@ -718,7 +766,7 @@ function updateAdviceUI() {
 
 $("genBtn").addEventListener("click", async () => {
   if (!backend.configured()) {
-    // フェーズ1フォールバック:プロンプトをコピー
+    // フォールバック:プロンプトをコピーして手動でAIに投げる
     $("promptBox").textContent = buildPrompt(selectedKey);
     openSheet("promptOverlay");
     return;
@@ -726,13 +774,17 @@ $("genBtn").addEventListener("click", async () => {
   const btn = $("genBtn");
   const original = btn.textContent;
   btn.disabled = true;
-  btn.textContent = "考え中…";
+  btn.textContent = "ギャルが見てる…👀";
   try {
     const r = await backend.advice(buildPrompt(selectedKey));
-    ensureDay(selectedKey).advice = r.text;
+    const d = ensureDay(selectedKey);
+    d.advice = r.advice || r.text || "";
+    if (typeof r.score === "number") d.score = Math.max(0, Math.min(100, Math.round(r.score)));
+    if (r.headline) d.headline = r.headline;
     saveRecords();
     renderDay();
-    toast("アドバイスが届きました 🎉");
+    refreshHome(); // 点数で表情が変わるので反映
+    toast(typeof d.score === "number" ? `ギャルの判定:${d.score}点💖` : "判定が届いたよ💖");
   } catch (err) {
     toast("取得に失敗: " + err.message);
   } finally {
@@ -768,12 +820,17 @@ function buildPrompt(baseKey) {
   const hour = new Date().getHours();
   const timeNote = hour < 11 ? "いまは朝" : hour < 16 ? "いまは昼過ぎ" : "いまは夕方〜夜";
 
+  const p = Math.round(pfcTotal(baseKey, "p"));
+  const f = Math.round(pfcTotal(baseKey, "f"));
+  const c = Math.round(pfcTotal(baseKey, "c"));
+
   const lines = [];
-  lines.push("あなたは私の専属の栄養・運動コーチです。下の記録を見て、【今日の残りの過ごし方】を具体的にアドバイスしてください。");
+  lines.push("あなたはギャルの栄養コーチです。ギャル語(「〜じゃん」「まじ」「神」「うける」など)と絵文字を使いつつ、栄養の中身は正確に。下の記録を見て判定してください。");
   lines.push("必ず次の順で答えてください:");
-  lines.push("1. 今日の残りの食事プラン:何をどれくらい食べるか(コンビニやスーパーで買える具体例つきで)");
-  lines.push("2. 今日の運動プラン:種類・時間・強度を具体的に。すでに運動済みならストレッチや休養の提案でOK");
-  lines.push("3. 最後にひとこと励まし");
+  lines.push("1. 今日のPFCバランスを100点満点で採点(点数と、なぜその点かを一言)");
+  lines.push("2. 今日の残りの食事プラン:何をどれくらい食べるか(コンビニで買える具体例つき)");
+  lines.push("3. 今日の運動プラン:種類・時間を具体的に。運動済みならストレッチや休養の提案でOK");
+  lines.push("4. 最後にギャルらしいひとこと励まし");
   lines.push("");
 
   const remainLabel = remaining >= 0
@@ -781,6 +838,9 @@ function buildPrompt(baseKey) {
     : `目標を 約${-remaining}kcal オーバー中`;
   lines.push(`【今日ここまで(${labelOfKey(baseKey)}・${timeNote})】${dayLine(baseKey)}`);
   lines.push(`→ ${remainLabel}(1日の目標: ${settings.goal}kcal)`);
+  if (p || f || c) {
+    lines.push(`→ PFC合計: たんぱく質${p}g / 脂質${f}g / 炭水化物${c}g`);
+  }
   lines.push("");
 
   const base = dateOfKey(baseKey);
@@ -822,11 +882,19 @@ $("pasteAdviceBtn").addEventListener("click", () => {
 
 $("saveAdviceBtn").addEventListener("click", () => {
   const text = $("adviceInput").value.trim();
-  ensureDay(selectedKey).advice = text;
+  const d = ensureDay(selectedKey);
+  d.advice = text;
+  // 貼り付けた文章に「85点」のような表記があれば点数として拾う
+  const m = text.match(/(\d{1,3})\s*点/);
+  if (m) {
+    const n = Number(m[1]);
+    if (n >= 0 && n <= 100) d.score = n;
+  }
   saveRecords();
   closeSheet("adviceOverlay");
   renderDay();
-  if (text) toast("アドバイスを保存しました 📝");
+  refreshHome();
+  if (text) toast("保存したよ📝");
 });
 
 /* ==================== 設定 ==================== */
@@ -862,7 +930,7 @@ $("testBackendBtn").addEventListener("click", async () => {
   btn.textContent = "テスト中…";
   try {
     await backend.ping();
-    toast("接続OK ✅");
+    toast("つながったじゃん✅");
   } catch (err) {
     toast("接続失敗: " + err.message);
   } finally {
@@ -878,7 +946,7 @@ $("settingsForm").addEventListener("submit", (e) => {
   backend.save($("backendUrl").value, $("backendToken").value);
   closeSheet("settingsOverlay");
   refreshHome();
-  toast("設定を保存しました");
+  toast("設定セーブしたよ💾");
 });
 
 /* ==================== 起動 ==================== */

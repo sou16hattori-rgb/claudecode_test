@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#8fd0f0" />
-  <title>ハビットクエスト</title>
+  <meta name="theme-color" content="#ff4f9a" />
+  <title>ギャルコーチ</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -15,33 +15,41 @@
   <div class="app">
 
     <header class="app-head">
-      <div class="brand">ハビット<span>クエスト</span></div>
+      <div class="brand">ギャル<span>コーチ</span></div>
       <button class="icon-btn" id="settingsBtn" aria-label="設定">⚙️</button>
     </header>
 
     <!-- ============ カレンダー画面 ============ -->
     <main class="screen" id="calScreen">
 
-      <!-- アバター -->
+      <!-- ギャルコーチ -->
       <section class="avatar-card" id="avatarCard">
-        <div class="slime-stage">
-          <div class="slime" id="slime">
-            <div class="slime-body">
+        <div class="gal-stage">
+          <div class="gal" id="gal">
+            <div class="hair-back"></div>
+            <div class="body"></div>
+            <div class="head">
+              <div class="bangs"></div>
+              <div class="brow left"></div>
+              <div class="brow right"></div>
               <div class="eye left"></div>
               <div class="eye right"></div>
+              <div class="blush left"></div>
+              <div class="blush right"></div>
               <div class="mouth"></div>
             </div>
-            <div class="slime-shadow"></div>
+            <div class="sparkle s1">✨</div>
+            <div class="sparkle s2">💖</div>
           </div>
         </div>
         <div class="avatar-meta">
           <div class="avatar-state">
             <span class="lv" id="avatarLv">Lv 1</span>
-            <span id="avatarState">ぷちスライム</span>
+            <span id="avatarState">見習いギャル</span>
           </div>
           <div class="exp-bar"><i id="expFill"></i></div>
-          <div class="exp-label" id="expLabel">EXP 0 / 80</div>
-          <p class="avatar-msg" id="avatarMsg">記録するとEXPがたまり、スライムが進化するよ</p>
+          <div class="exp-label" id="expLabel">なかよし度 0 / 80</div>
+          <p class="avatar-msg" id="avatarMsg">記録するとギャルと仲良くなれるよ💅</p>
         </div>
       </section>
 
@@ -115,10 +123,16 @@
       </section>
 
       <section class="card advice">
-        <h3>AIアドバイス</h3>
-        <p class="advice-text" id="adviceText">まだアドバイスはありません。</p>
-        <button class="btn" id="genBtn">✨ アドバイス用プロンプトを生成</button>
-        <button class="btn ghost" id="pasteAdviceBtn">Claudeの回答を貼り付けて保存</button>
+        <div class="card-head">
+          <h3>ギャルの判定</h3>
+          <div class="score" id="scoreBadge" hidden>
+            <b id="scoreVal">–</b><small>点</small>
+          </div>
+        </div>
+        <p class="advice-headline" id="adviceHeadline" hidden></p>
+        <p class="advice-text" id="adviceText">まだ判定してもらってないよ〜</p>
+        <button class="btn" id="genBtn">💖 ギャルに判定してもらう</button>
+        <button class="btn ghost" id="pasteAdviceBtn">コメントを貼り付けて保存</button>
       </section>
     </main>
 

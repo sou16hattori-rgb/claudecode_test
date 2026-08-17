@@ -1,5 +1,5 @@
 /**
- * ハビットギルド — 中継サーバー (Cloudflare Worker)
+ * ギャルコーチ — 中継サーバー (Cloudflare Worker)
  *
  * アプリ(フロント)から呼ばれ、Anthropic Claude API に中継する。
  * APIキーはこの Worker の環境変数(Secret)にだけ置き、フロントには絶対に置かない。
@@ -61,7 +61,7 @@ export default {
       return json({ error: "unknown action" }, 400, cors);
     } catch (err) {
       const message = String(err && err.message || err);
-      console.error("habit-guild-api error:", message);
+      console.error("gal-coach-api error:", message);
       return json({ error: message }, 502, cors);
     }
   },
@@ -123,23 +123,44 @@ async function estimate(body, env) {
   return JSON.parse(text);
 }
 
-/* -------- 今日のアドバイス -------- */
+/* -------- ギャルコーチの判定(点数 + アドバイス) -------- */
 
 async function advice(body, env) {
   const prompt = (body.prompt || "").trim();
   if (!prompt) throw new Error("prompt is empty");
 
+  const schema = {
+    type: "object",
+    properties: {
+      score: { type: "integer" },
+      headline: { type: "string" },
+      advice: { type: "string" },
+    },
+    required: ["score", "headline", "advice"],
+    additionalProperties: false,
+  };
+
   const result = await callClaude(env, {
-    max_tokens: 500,
+    max_tokens: 700,
     thinking: { type: "disabled" },
+    output_config: { format: { type: "json_schema", schema } },
     system:
-      "あなたは親身な栄養・運動コーチです。最優先は「今日の残りをどう過ごすか」の具体的な行動プラン:" +
-      "残りの食事で何をどれくらい食べるか(身近で買える具体例つき)と、今日やる運動(種類・時間)。" +
-      "3〜6行、平易な日本語で、最後に前向きな一言。マークダウンの見出しや箇条書き記号は使わない。",
+      "あなたは日本のギャルの栄養コーチ。親友みたいな距離感で、ギャル語(「〜じゃん」「まじで」「〜すぎ」" +
+      "「神」「うける」「それな」「ガチ」など)と絵文字を自然に使って話す。ただし栄養の中身は管理栄養士レベルに正確に。\n" +
+      "score: その日のPFCバランスと食べ方を0〜100点で採点。たんぱく質が足りてれば加点、脂質・糖質に偏ってたら減点、" +
+      "総カロリーが目標を大きく超えていたら減点。記録が少なすぎて判断できない場合は50点前後にする。甘すぎず辛すぎず、正直に。\n" +
+      "headline: 点数に対するギャルの第一声を25字以内で(例:「たんぱく質やば神じゃん✨」)。\n" +
+      "advice: 3〜5文。まず点数の理由、次に今日の残りの食事プラン(コンビニで買える具体例つき)、" +
+      "今日の運動プラン(種類と時間)、最後に励まし。マークダウン記号や箇条書き記号は使わず、話し言葉で。",
     messages: [{ role: "user", content: prompt }],
   });
 
-  return { text: firstText(result).trim() };
+  const parsed = JSON.parse(firstText(result));
+  return {
+    score: parsed.score,
+    headline: String(parsed.headline || "").trim(),
+    advice: String(parsed.advice || "").trim(),
+  };
 }
 
 /* -------- 共通 -------- */
