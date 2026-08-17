@@ -1,6 +1,7 @@
 /* ギャルコーチ — ギャル系テーマ
    ピンク×ラベンダーの明るい配色。丸ゴシックで柔らかく、
-   アバター(ギャル)はCSSのみで描画し、表情・体型・レベルで見た目が変わる。 */
+   アバター(ギャル)はインラインSVGで描画し、表情・体型・レベルで見た目が変わる。
+   表情パーツはSVG内に複数用意しておき、ここのクラスで出し分ける。 */
 
 :root {
   --bg1: #ffe6f2;
@@ -99,229 +100,145 @@ body {
 }
 
 .gal-stage {
-  width: 100px; height: 110px;
+  width: 118px; height: 144px;
   flex: none;
   position: relative;
   background:
-    radial-gradient(ellipse 70% 45% at 50% 100%, #ffd0e6, transparent 70%),
-    linear-gradient(180deg, #fff2f8 0%, #ffe6f2 100%);
+    radial-gradient(ellipse 75% 45% at 50% 108%, #ffc9e2, transparent 70%),
+    linear-gradient(180deg, #fff4f9 0%, #ffe4f0 100%);
   border: 2px solid var(--line);
   border-radius: 18px;
   overflow: hidden;
 }
 
 .gal {
-  position: absolute; inset: 0;
-  animation: idle 3.2s ease-in-out infinite;
+  display: block;
+  width: 100%; height: 100%;
+  animation: idle 3.4s ease-in-out infinite;
 }
 @keyframes idle {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-3px); }
+  50% { transform: translateY(-2.5px); }
 }
 
-/* 髪(後ろ) */
-.gal .hair-back {
-  position: absolute; top: 12px; left: 50%;
-  transform: translateX(-50%);
-  width: 76px; height: 82px;
-  background: linear-gradient(180deg, #ffe08a 0%, #f0b24a 55%, #d99433 100%);
-  border-radius: 38px 38px 26px 26px;
-  z-index: 0;
-}
+/* ---- 基本の塗り ---- */
+.gal .hair { fill: url(#hairBlonde); }
+.gal .face,
+.gal .neck,
+.gal .ear { fill: url(#skinG); }
+.gal .neck-shadow { fill: #d99b70; opacity: .55; }
+.gal .ear { stroke: #dda67d; stroke-width: .8; }
+.gal .top { fill: url(#topG); }
+.gal .top-neckline { fill: #f6c49f; }
 
-/* 体(服) */
-.gal .body {
-  position: absolute; bottom: 0; left: 50%;
-  transform: translateX(-50%);
-  width: 46px; height: 40px;
-  background: linear-gradient(180deg, #ff8ec0, var(--pink));
-  border-radius: 20px 20px 4px 4px;
-  z-index: 1;
-  transition: width .35s ease;
+.gal .sclera { fill: #fffdfa; }
+.gal .iris { fill: url(#irisG); }
+.gal .pupil { fill: #23130c; }
+.gal .glint { fill: #fff; opacity: .95; }
+.gal .glint.sm { opacity: .7; }
+.gal .liner {
+  fill: none; stroke: #3a2028;
+  stroke-width: 3.2; stroke-linecap: round;
 }
-
-/* 顔 */
-.gal .head {
-  position: absolute; top: 16px; left: 50%;
-  transform: translateX(-50%);
-  width: 56px; height: 54px;
-  background: linear-gradient(180deg, #ffe4d2, #ffd3bd);
-  border-radius: 50% 50% 46% 46%;
-  z-index: 2;
+.gal .lash {
+  fill: none; stroke: #3a2028;
+  stroke-width: 2.2; stroke-linecap: round;
 }
-.gal .bangs {
-  position: absolute; top: -4px; left: -3px;
-  width: 62px; height: 25px;
-  background: linear-gradient(180deg, #ffe08a, #f0b24a);
-  border-radius: 31px 31px 44% 44% / 25px 25px 70% 70%;
-  z-index: 3;
+.gal .underline {
+  fill: none; stroke: #8a5560;
+  stroke-width: 1.3; stroke-linecap: round; opacity: .75;
+}
+.gal .happy-eye {
+  fill: none; stroke: #3a2028;
+  stroke-width: 3.2; stroke-linecap: round;
 }
 .gal .brow {
-  position: absolute; top: 20px;
-  width: 13px; height: 3px;
-  background: #c98a4a;
-  border-radius: 2px;
-  z-index: 4;
-  transition: transform .25s ease, top .25s ease;
+  fill: none; stroke: #a9743c;
+  stroke-width: 3; stroke-linecap: round;
 }
-.gal .brow.left { left: 8px; transform: rotate(-7deg); }
-.gal .brow.right { right: 8px; transform: rotate(7deg); }
-
-.gal .eye {
-  position: absolute; top: 25px;
-  width: 12px; height: 14px;
-  background: #46283f;
-  border-radius: 50%;
-  z-index: 4;
-  transition: height .25s ease, border-radius .25s ease;
+.gal .nose {
+  fill: none; stroke: #d79a72;
+  stroke-width: 1.6; stroke-linecap: round;
 }
-.gal .eye.left { left: 9px; }
-.gal .eye.right { right: 9px; }
-.gal .eye::after {
-  content: "";
-  position: absolute; top: 2px; left: 3px;
-  width: 5px; height: 5px;
-  background: #fff;
-  border-radius: 50%;
-}
-/* まつげ */
-.gal .eye::before {
-  content: "";
-  position: absolute; top: -2px;
-  width: 8px; height: 3px;
-  background: #46283f;
-  border-radius: 2px;
-}
-.gal .eye.left::before { left: -3px; transform: rotate(-18deg); }
-.gal .eye.right::before { right: -3px; transform: rotate(18deg); }
-
-.gal .blush {
-  position: absolute; top: 36px;
-  width: 12px; height: 7px;
-  background: rgba(255, 110, 165, .45);
-  border-radius: 50%;
-  z-index: 4;
-}
-.gal .blush.left { left: 4px; }
-.gal .blush.right { right: 4px; }
-
-.gal .mouth {
-  position: absolute; top: 41px; left: 50%;
-  transform: translateX(-50%);
-  width: 14px; height: 7px;
-  border-bottom: 2.5px solid #c04a6a;
-  border-radius: 0 0 12px 12px;
-  z-index: 4;
-  transition: all .25s ease;
+.gal .lip { fill: #d94f78; }
+.gal .teeth { fill: #fffaf8; }
+.gal .blush { fill: #ff7fa8; opacity: .38; }
+.gal .earrings circle {
+  fill: none; stroke: var(--gold);
+  stroke-width: 2;
 }
 
-.gal .sparkle {
-  position: absolute;
-  font-size: 13px;
-  opacity: 0;
-  z-index: 5;
-  transition: opacity .3s ease;
-}
-.gal .sparkle.s1 { top: 8px; left: 5px; }
-.gal .sparkle.s2 { top: 24px; right: 3px; }
+/* ---- 出し分け(初期状態) ---- */
+.gal .eyes-happy,
+.gal .brows-worried,
+.gal .brows-angry,
+.gal .m-grin,
+.gal .m-flat,
+.gal .m-frown,
+.gal .tiara,
+.gal .earrings,
+.gal .fx { display: none; }
 
-/* --- 気分(判定スコアで変化) --- */
-.gal.mood-happy .mouth {
-  width: 20px; height: 11px;
-  background: #d1436b;
-  border: none;
-  border-radius: 3px 3px 12px 12px;
+/* ---- 気分(判定スコアで変化) ---- */
+.gal.mood-happy .eyes-open { display: none; }
+.gal.mood-happy .eyes-happy { display: block; }
+.gal.mood-happy .m-smile { display: none; }
+.gal.mood-happy .m-grin { display: block; }
+.gal.mood-happy .fx-sparkle {
+  display: block;
+  animation: twinkle 1.8s ease-in-out infinite;
 }
-.gal.mood-happy .eye { height: 9px; border-radius: 12px 12px 4px 4px; }
-.gal.mood-happy .sparkle {
-  opacity: 1;
-  animation: twinkle 1.6s ease-in-out infinite;
-}
-.gal.mood-happy .sparkle.s2 { animation-delay: .8s; }
+.gal.mood-happy .fx-sparkle.s2 { animation-delay: .9s; }
 @keyframes twinkle {
-  0%, 100% { opacity: .3; transform: scale(.8); }
-  50% { opacity: 1; transform: scale(1.15); }
+  0%, 100% { opacity: .35; }
+  50% { opacity: 1; }
 }
 
-.gal.mood-smile .mouth { width: 15px; }
+.gal.mood-worried .brows-normal { display: none; }
+.gal.mood-worried .brows-worried { display: block; }
+.gal.mood-worried .m-smile { display: none; }
+.gal.mood-worried .m-flat { display: block; }
 
-.gal.mood-worried .mouth {
-  width: 9px; height: 0;
-  border-radius: 0;
-}
-.gal.mood-worried .brow.left { transform: rotate(11deg); top: 21px; }
-.gal.mood-worried .brow.right { transform: rotate(-11deg); top: 21px; }
+.gal.mood-angry .brows-normal { display: none; }
+.gal.mood-angry .brows-angry { display: block; }
+.gal.mood-angry .m-smile { display: none; }
+.gal.mood-angry .m-frown { display: block; }
+.gal.mood-angry .blush { fill: #ff5a5a; opacity: .42; }
+.gal.mood-angry .fx-angry { display: block; }
 
-.gal.mood-angry .mouth {
-  border-bottom: none;
-  border-top: 2.5px solid #c04a6a;
-  border-radius: 12px 12px 0 0;
-  top: 43px;
+/* ---- 体型(直近の食生活で変化) ---- */
+.gal .torso, .gal .neck { transform-origin: 70px 170px; transition: transform .35s ease; }
+.gal .face-group { transform-origin: 70px 55px; transition: transform .35s ease; }
+.gal .chin-fold {
+  display: none;
+  fill: none; stroke: #d99b70;
+  stroke-width: 1.6; stroke-linecap: round; opacity: .7;
 }
-.gal.mood-angry .brow.left { transform: rotate(20deg); top: 22px; }
-.gal.mood-angry .brow.right { transform: rotate(-20deg); top: 22px; }
-.gal.mood-angry .blush { background: rgba(255, 80, 80, .5); }
-.gal.mood-angry::after {
-  content: "💢";
-  position: absolute;
-  top: 8px; right: 5px;
-  font-size: 14px;
-  z-index: 5;
-}
+.gal.body-slim .torso { transform: scaleX(.84); }
+.gal.body-slim .face-group { transform: scaleX(.95); }
+.gal.body-chubby .torso { transform: scaleX(1.34); }
+.gal.body-chubby .neck { transform: scaleX(1.18); }
+.gal.body-chubby .face-group { transform: scaleX(1.13); }
+.gal.body-chubby .chin-fold { display: block; }
+.gal.body-chubby .fx-sweat { display: block; }
 
-/* --- 体型(直近の食生活で変化) --- */
-.gal.body-slim .body { width: 38px; }
-.gal.body-normal .body { width: 46px; }
-.gal.body-chubby .body { width: 64px; border-radius: 24px 24px 4px 4px; }
-.gal.body-chubby .head { width: 60px; }
-.gal.body-chubby::before {
-  content: "💦";
-  position: absolute;
-  top: 12px; left: 4px;
-  font-size: 12px;
-  z-index: 5;
-}
+/* ---- なかよし度(レベル)で見た目アップ ---- */
+.gal:not(.tier-1) .earrings { display: block; }          /* Lv3〜 フープピアス */
+.gal.tier-3 .hair, .gal.tier-4 .hair { fill: url(#hairBright); }  /* Lv6〜 明るい髪 */
+.gal.tier-4 .tiara, .gal.tier-5 .tiara { display: block; }        /* Lv10〜 ティアラ */
+.gal .tiara path { fill: var(--gold); stroke: #d9a01f; stroke-width: 1; }
+.gal .tiara circle { fill: #fff0f6; }
+.gal.tier-5 .hair { fill: url(#hairPink); }              /* Lv15 伝説 */
+.gal.tier-5 .top { fill: url(#topGLegend); }
 
-/* --- レベル(なかよし度)で見た目アップ --- */
-/* Lv3〜: ピアス */
-.gal:not(.tier-1) .head::before,
-.gal:not(.tier-1) .head::after {
-  content: "";
-  position: absolute; top: 33px;
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: var(--gold);
-  box-shadow: 0 0 0 1px rgba(255,255,255,.7);
-  z-index: 5;
-}
-.gal:not(.tier-1) .head::before { left: -2px; }
-.gal:not(.tier-1) .head::after { right: -2px; }
-/* Lv6〜: 明るいメッシュ髪 */
-.gal.tier-3 .hair-back, .gal.tier-3 .bangs,
-.gal.tier-4 .hair-back, .gal.tier-4 .bangs {
-  background: linear-gradient(180deg, #fff0b8, #f2be55 60%, #e0a63c);
-}
-/* Lv10〜: ティアラ */
-.gal.tier-4 .bangs::after, .gal.tier-5 .bangs::after {
-  content: "👑";
-  position: absolute; top: -13px; left: 50%;
-  transform: translateX(-50%);
-  font-size: 16px;
-}
-/* Lv15: 伝説のピンク髪 */
-.gal.tier-5 .hair-back, .gal.tier-5 .bangs {
-  background: linear-gradient(180deg, #ffd9f2, #e79ae8 55%, #c874d8);
-}
-.gal.tier-5 .body {
-  background: linear-gradient(180deg, #c9a6ff, var(--lav));
-}
+.gal .fx { font-size: 15px; }
 
 @media (prefers-reduced-motion: reduce) {
   .gal { animation: none; }
-  .gal.mood-happy .sparkle { animation: none; }
+  .gal.mood-happy .fx-sparkle { animation: none; opacity: 1; }
+  .gal .torso, .gal .face-group { transition: none; }
   .day { transition: none; }
 }
-
 .avatar-meta { min-width: 0; flex: 1; }
 .avatar-state {
   font-size: 15px;

@@ -14,6 +14,20 @@
 | <img src="docs/home-good.png" width="230" alt="好調時のギャル"> | <img src="docs/home-bad.png" width="230" alt="食べすぎが続いたギャル"> | <img src="docs/verdict.png" width="230" alt="点数つきの判定"> |
 | ご機嫌でスリム | 怒ってぽっちゃり | 点数+ギャル語アドバイス |
 
+### キャラクターのリアクション
+
+キャラクターは画像ファイルではなく**インラインSVGで描画**している。表情・体型・レベルごとの
+パーツをSVG内に持たせ、CSSクラスで出し分けるため、状態が増えても画像を増やさずに済む。
+
+点数に応じた表情:
+
+<img src="docs/moods.png" width="640" alt="点数に応じた4つの表情とレベル差分">
+
+直近の食生活に応じた体型:
+
+<img src="docs/bodies.png" width="640" alt="スリム・ふつう・ぽっちゃりの体型差">
+
+
 ---
 
 ## 何ができるか

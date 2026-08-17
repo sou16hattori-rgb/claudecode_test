@@ -324,7 +324,8 @@ function renderAvatar() {
   const tier = tierOf(lv);
 
   const gal = $("gal");
-  gal.className = "gal"; // 一旦リセット
+  // SVG要素なので className への代入は不可。setAttribute でリセットする
+  gal.setAttribute("class", "gal");
   gal.classList.add(tier.cls);
 
   // 直近7日の生活ぶり
