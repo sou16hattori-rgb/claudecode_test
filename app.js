@@ -355,11 +355,11 @@ function renderAvatar() {
       mood = "mood-smile";
       msg = `${score}点、いい感じじゃん😊 あとちょいで神いける`;
     } else if (score >= 40) {
-      mood = "mood-worried";
-      msg = `${score}点…うーん、ちょい崩れてるかも🥺 立て直そ`;
+      mood = "mood-smile";
+      msg = `${score}点!記録できてるのがまずえらいって🙆‍♀️`;
     } else {
-      mood = "mood-angry";
-      msg = `${score}点!?ちょっと〜、さすがに食べすぎじゃん💢`;
+      mood = "mood-worried";
+      msg = `${score}点でも記録したのはえらいじゃん🥺 明日いっしょに立て直そ`;
     }
   } else if (Object.keys(records).length === 0) {
     // 初回起動はウェルカムムード
@@ -369,11 +369,11 @@ function renderAvatar() {
     mood = "mood-happy";
     msg = "記録えらすぎ✨ この調子でキープしよ〜";
   } else if (overDays >= 3) {
-    mood = "mood-worried";
-    msg = "最近食べすぎ続いてるっぽい🥺 今日は軽めにいこ";
+    mood = "mood-smile";
+    msg = "続けてるのがまじえらい🙆‍♀️ 今日は軽めにいってみよ";
   } else if (recorded === 0) {
-    mood = "mood-angry";
-    msg = "最近サボってるじゃん💢 まずは1食からいこ?";
+    mood = "mood-worried";
+    msg = "ひさしぶり🥺 1食だけでも入れてこ?待ってた〜";
   } else {
     mood = "mood-smile";
     msg = "記録するとギャルと仲良くなれるよ💅";
@@ -827,8 +827,9 @@ function buildPrompt(baseKey) {
 
   const lines = [];
   lines.push("あなたはギャルの栄養コーチです。ギャル語(「〜じゃん」「まじ」「神」「うける」など)と絵文字を使いつつ、栄養の中身は正確に。下の記録を見て判定してください。");
+  lines.push("大前提として、あなたの役割はまず褒めることです。どんな記録でも良かった点を具体的に見つけ、そこから話し始めてください。食べすぎた日でも責めず、改善は「もっと良くなる提案」として前向きに伝えてください。");
   lines.push("必ず次の順で答えてください:");
-  lines.push("1. 今日のPFCバランスを100点満点で採点(点数と、なぜその点かを一言)");
+  lines.push("1. 今日のPFCバランスを100点満点で採点(点数と、まず良かった点を具体的に褒める)");
   lines.push("2. 今日の残りの食事プラン:何をどれくらい食べるか(コンビニで買える具体例つき)");
   lines.push("3. 今日の運動プラン:種類・時間を具体的に。運動済みならストレッチや休養の提案でOK");
   lines.push("4. 最後にギャルらしいひとこと励まし");
