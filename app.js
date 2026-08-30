@@ -18,11 +18,12 @@ function loadRecords() {
 function saveRecords() {
   localStorage.setItem(STORE_RECORDS, JSON.stringify(records));
 }
+const DEFAULT_SETTINGS = { goal: 2000, nickname: "", galType: "royal" };
 function loadSettings() {
   try {
-    return { goal: 2000, ...(JSON.parse(localStorage.getItem(STORE_SETTINGS)) || {}) };
+    return { ...DEFAULT_SETTINGS, ...(JSON.parse(localStorage.getItem(STORE_SETTINGS)) || {}) };
   } catch {
-    return { goal: 2000 };
+    return { ...DEFAULT_SETTINGS };
   }
 }
 function saveSettings() {
@@ -268,6 +269,86 @@ const EXP_MEAL = 10;
 const EXP_EXERCISE = 25;
 const EXP_GOAL_DAY = 30;
 
+/* ---- ギャルのタイプ ----
+   見た目(CSS変数)は style.css の .gal.type-xxx 側で定義。
+   ここでは呼びかけの文言と、AIに渡す口調の指示を持つ。
+   {n} はユーザーの呼び名に置き換わる(未設定なら消える)。 */
+const GAL_TYPES = [
+  {
+    id: "royal", cls: "type-royal", name: "王道ギャル",
+    catch: "テンション高めでガンガン褒めてくるタイプ。金髪ウェーブ×日焼け肌💛",
+    tone: "テンション高めの王道ギャル。「まじ」「神」「〜じゃん」「うける」を多めに、絵文字も盛りめに使う。",
+    lines: {
+      welcome: "はじめまして{n}💖 とりま今日食べたやつ入れてみて!",
+      great: "{n}まじ神バランスじゃん✨ その調子でいこ〜",
+      good: "{n}いい感じじゃん😊 あとちょいで神いける",
+      ok: "記録できてる時点で{n}えらいって🙆‍♀️",
+      low: "点数はアレでも記録した{n}がえらいじゃん🥺 いっしょに立て直そ",
+      keep: "{n}記録えらすぎ✨ このままキープしよ〜",
+      over: "続けてるのがまじえらい🙆‍♀️ {n}今日は軽めにいってみよ",
+      away: "{n}ひさしぶりじゃん🥺 1食だけでも入れてこ?待ってた〜",
+      idle: "記録するとうちらもっと仲良くなれるよ💅",
+    },
+  },
+  {
+    id: "natural", cls: "type-natural", name: "ナチュラル系",
+    catch: "やさしくじんわり褒めてくるタイプ。ブラウンのゆるウェーブ×カーデ🤎",
+    tone: "やさしくてゆるめのナチュラル系ギャル。ギャル語は使うけどトーンは穏やかで、寄り添うように話す。絵文字はやわらかめ。",
+    lines: {
+      welcome: "はじめまして{n}〜🤍 ゆるっと今日のごはんから入れてこ?",
+      great: "{n}すごいじゃん🤍 バランスばっちりだよ〜",
+      good: "{n}いい感じ〜☺️ もうちょいで完璧だね",
+      ok: "ちゃんと記録できてる{n}、それだけでえらいよ〜🌱",
+      low: "点数は気にしなくていいって🤍 記録した{n}がえらいの",
+      keep: "{n}ちゃんと続いてる〜🤍 えらすぎるって",
+      over: "続けてるのがまずえらいよ〜☺️ {n}今日はゆるっと軽めでいこ?",
+      away: "{n}おかえり〜🌱 1個だけでも入れてこ?待ってたよ",
+      idle: "ちょっとずつでいいから一緒にやってこ〜🤍",
+    },
+  },
+  {
+    id: "mode", cls: "type-mode", name: "モード系",
+    catch: "クールに短く言い切るタイプ。プラチナブロンド×黒ジャケ🖤",
+    tone: "クールで大人っぽいモード系ギャル。短めに言い切る。テンションは低めだけど、褒めるところはちゃんと言葉にする。絵文字は少なめで黒系。",
+    lines: {
+      welcome: "{n}よろしく🖤 まず今日食べたやつ入れて",
+      great: "{n}完璧。文句なしのバランスだわ✨",
+      good: "{n}いいじゃん🖤 あと一歩で完璧",
+      ok: "記録してる時点で{n}は続いてる。それが強いって🖤",
+      low: "点数はどうでもいい。{n}が記録したこと自体が価値あるから",
+      keep: "{n}ちゃんと続いてる。マジで強いって🖤",
+      over: "続いてるのは事実。{n}今日は軽めにいこ",
+      away: "{n}おかえり🖤 1食でいいから入れて",
+      idle: "記録した分だけ、うちも{n}のこと分かるようになるから🖤",
+    },
+  },
+  {
+    id: "ane", cls: "type-ane", name: "姉御ギャル",
+    catch: "姉御肌で背中を押してくるタイプ。黒髪ロング×ラベンダー💜",
+    tone: "姉御肌の頼れるギャル。ちょっと男前な言い回しで背中を押す。「〜っしょ」「まかせな」など。絵文字は控えめに効かせる。",
+    lines: {
+      welcome: "{n}よろしくな💜 とりま今日のごはんから入れてこ",
+      great: "{n}やるじゃん💜 このバランス、うちが保証する",
+      good: "{n}いい線いってる😎 あとちょいっしょ",
+      ok: "記録つけてる{n}はちゃんと前進してるっしょ💜",
+      low: "点数なんか気にすんな。{n}が記録した、それが全部💜",
+      keep: "{n}ちゃんと続いてるじゃん😎 まじで偉い",
+      over: "続いてるのが一番でかい。{n}今日は軽めでいこか💜",
+      away: "{n}おかえり💜 1食からでいいから戻ってこ",
+      idle: "うちがついてるから、{n}のペースでいこ💜",
+    },
+  },
+];
+
+function galType() {
+  return GAL_TYPES.find((t) => t.id === settings.galType) || GAL_TYPES[0];
+}
+/* {n} を呼び名に差し替える(未設定なら丸ごと消える) */
+function say(key) {
+  const line = galType().lines[key] || "";
+  return line.replaceAll("{n}", settings.nickname || "");
+}
+
 const TIERS = [
   { minLv: 15, cls: "tier-5", name: "伝説のギャル" },
   { minLv: 10, cls: "tier-4", name: "カリスマギャル" },
@@ -326,6 +407,7 @@ function renderAvatar() {
   const gal = $("gal");
   // SVG要素なので className への代入は不可。setAttribute でリセットする
   gal.setAttribute("class", "gal");
+  gal.classList.add(galType().cls);
   gal.classList.add(tier.cls);
 
   // 直近7日の生活ぶり
@@ -350,33 +432,33 @@ function renderAvatar() {
   if (score != null) {
     if (score >= 80) {
       mood = "mood-happy";
-      msg = `${score}点!まじ神バランスじゃん✨ その調子でいこ〜`;
+      msg = `${score}点!` + say("great");
     } else if (score >= 60) {
       mood = "mood-smile";
-      msg = `${score}点、いい感じじゃん😊 あとちょいで神いける`;
+      msg = `${score}点、` + say("good");
     } else if (score >= 40) {
       mood = "mood-smile";
-      msg = `${score}点!記録できてるのがまずえらいって🙆‍♀️`;
+      msg = `${score}点!` + say("ok");
     } else {
       mood = "mood-worried";
-      msg = `${score}点でも記録したのはえらいじゃん🥺 明日いっしょに立て直そ`;
+      msg = `${score}点。` + say("low");
     }
   } else if (Object.keys(records).length === 0) {
     // 初回起動はウェルカムムード
     mood = "mood-happy";
-    msg = "はじめまして💖 とりあえず今日食べたもの入れてみて!";
+    msg = say("welcome");
   } else if (recorded >= 5 && overDays <= 1) {
     mood = "mood-happy";
-    msg = "記録えらすぎ✨ この調子でキープしよ〜";
+    msg = say("keep");
   } else if (overDays >= 3) {
     mood = "mood-smile";
-    msg = "続けてるのがまじえらい🙆‍♀️ 今日は軽めにいってみよ";
+    msg = say("over");
   } else if (recorded === 0) {
     mood = "mood-worried";
-    msg = "ひさしぶり🥺 1食だけでも入れてこ?待ってた〜";
+    msg = say("away");
   } else {
     mood = "mood-smile";
-    msg = "記録するとギャルと仲良くなれるよ💅";
+    msg = say("idle");
   }
   gal.classList.add(mood);
 
@@ -448,7 +530,7 @@ function renderDay() {
   const mealList = $("mealList");
   mealList.innerHTML = "";
   if (rec.meals.length === 0) {
-    mealList.innerHTML = `<div class="empty-note">まだ記録がありません。「＋ 追加」から記録しましょう。</div>`;
+    mealList.innerHTML = `<div class="empty-note">まだ何も入ってないよ〜。「＋ 入れる」からどうぞ🍽</div>`;
   }
   const slotEmoji = { 朝食: "🍳", 昼食: "🍜", 夕食: "🍚", 間食: "🍩" };
   for (const meal of rec.meals) {
@@ -481,7 +563,7 @@ function renderDay() {
   const exList = $("exList");
   exList.innerHTML = "";
   if (rec.exercises.length === 0) {
-    exList.innerHTML = `<div class="empty-note">まだ記録がありません。</div>`;
+    exList.innerHTML = `<div class="empty-note">まだ何も入ってないよ〜🏃</div>`;
   }
   for (const ex of rec.exercises) {
     const row = document.createElement("button");
@@ -505,7 +587,7 @@ function renderDay() {
   }
   $("adviceHeadline").hidden = !rec.headline;
   $("adviceHeadline").textContent = rec.headline || "";
-  $("adviceText").textContent = rec.advice || "まだ判定してもらってないよ〜";
+  $("adviceText").textContent = rec.advice || "まだ見てないよ〜、押してみて?";
   updateAdviceUI();
 }
 
@@ -556,7 +638,7 @@ function openMealSheet(mealId) {
   form.reset();
   $("photoPreview").hidden = true;
   $("deleteMealBtn").hidden = !mealId;
-  $("mealSheetTitle").textContent = mealId ? "食事の記録を編集" : "食事を記録";
+  $("mealSheetTitle").textContent = mealId ? "ごはん直す🍽" : "ごはん入れよ〜🍽";
 
   if (mealId) {
     const meal = dayRecord(selectedKey).meals.find((m) => m.id === mealId);
@@ -592,7 +674,7 @@ $("mealPhoto").addEventListener("change", async (e) => {
     $("photoPreviewImg").src = pendingPhoto;
     $("photoPreview").hidden = false;
   } catch {
-    toast("写真の読み込みに失敗しました");
+    toast("写真うまく読めんかった…もう一回いける?🙏");
   }
 });
 
@@ -617,7 +699,7 @@ function compressImage(file, maxSize, quality) {
 /* AIでカロリー・PFCを推定 */
 $("estimateBtn").addEventListener("click", async () => {
   if (!backend.configured()) {
-    toast("先に設定(⚙️)でAI連携を登録してください");
+    toast("先に⚙️でAIつないでね〜🙏");
     return;
   }
   const text = $("mealItems").value.trim();
@@ -628,7 +710,7 @@ $("estimateBtn").addEventListener("click", async () => {
   const btn = $("estimateBtn");
   const original = btn.textContent;
   btn.disabled = true;
-  btn.textContent = "推定中…";
+  btn.textContent = "考え中…👀";
   try {
     const r = await backend.estimate({ text, image: pendingPhoto, examples: correctionExamples() });
     if (r.kcal != null) $("mealKcal").value = Math.round(r.kcal);
@@ -646,9 +728,9 @@ $("estimateBtn").addEventListener("click", async () => {
       f: r.fat_g != null ? round1(r.fat_g) : null,
       c: r.carbs_g != null ? round1(r.carbs_g) : null,
     };
-    toast("推定したよ〜✨ 違ってたら直して!");
+    toast("出してみたよ〜✨ 違ってたら直して!");
   } catch (err) {
-    toast("推定に失敗: " + err.message);
+    toast("うまく出せんかった…" + err.message);
   } finally {
     btn.disabled = false;
     btn.textContent = original;
@@ -691,7 +773,7 @@ $("mealForm").addEventListener("submit", async (e) => {
   saveRecords();
   closeSheet("mealOverlay");
   renderDay();
-  toast(`食事を記録した! +${EXP_MEAL} EXP 🍽`);
+  toast(`ごはん入ったよ〜! +${EXP_MEAL} EXP 🍽`);
 });
 
 $("deleteMealBtn").addEventListener("click", async () => {
@@ -714,7 +796,7 @@ function openExSheet(exId) {
   const form = $("exForm");
   form.reset();
   $("deleteExBtn").hidden = !exId;
-  $("exSheetTitle").textContent = exId ? "運動の記録を編集" : "運動を記録";
+  $("exSheetTitle").textContent = exId ? "運動直す🏃" : "運動入れよ〜🏃";
   if (exId) {
     const ex = dayRecord(selectedKey).exercises.find((x) => x.id === exId);
     if (ex) {
@@ -742,7 +824,7 @@ $("exForm").addEventListener("submit", (e) => {
   saveRecords();
   closeSheet("exOverlay");
   renderDay();
-  toast(`運動を記録した! +${EXP_EXERCISE} EXP 🏃`);
+  toast(`運動えらすぎ! +${EXP_EXERCISE} EXP 🏃`);
 });
 
 $("deleteExBtn").addEventListener("click", () => {
@@ -759,7 +841,7 @@ $("deleteExBtn").addEventListener("click", () => {
 /* バックエンドの有無でUIを切り替え */
 function updateAdviceUI() {
   const online = backend.configured();
-  $("genBtn").textContent = online ? "💖 ギャルに判定してもらう" : "💖 判定用プロンプトを作る";
+  $("genBtn").textContent = online ? "💖 ギャルに見てもらう" : "💖 ジャッジ用プロンプト作る";
   $("pasteAdviceBtn").hidden = online; // オンライン時はコピペ不要
   $("estimateBtn").hidden = !online;
   $("estimateHint").hidden = online;
@@ -785,9 +867,9 @@ $("genBtn").addEventListener("click", async () => {
     saveRecords();
     renderDay();
     refreshHome(); // 点数で表情が変わるので反映
-    toast(typeof d.score === "number" ? `ギャルの判定:${d.score}点💖` : "判定が届いたよ💖");
+    toast(typeof d.score === "number" ? `ジャッジ出たよ:${d.score}点💖` : "ジャッジ届いたよ💖");
   } catch (err) {
-    toast("取得に失敗: " + err.message);
+    toast("ジャッジ届かんかった…" + err.message);
   } finally {
     btn.disabled = false;
     btn.textContent = original;
@@ -825,9 +907,17 @@ function buildPrompt(baseKey) {
   const f = Math.round(pfcTotal(baseKey, "f"));
   const c = Math.round(pfcTotal(baseKey, "c"));
 
+  const type = galType();
+  const nick = settings.nickname;
+
   const lines = [];
-  lines.push("あなたはギャルの栄養コーチです。ギャル語(「〜じゃん」「まじ」「神」「うける」など)と絵文字を使いつつ、栄養の中身は正確に。下の記録を見て判定してください。");
+  lines.push(`あなたは「${type.name}」タイプのギャル栄養コーチです。ギャル語と絵文字を使いつつ、栄養の中身は正確に。下の記録を見て判定してください。`);
+  lines.push(`【キャラ設定】${type.tone}`);
+  if (nick) {
+    lines.push(`【呼び名】ユーザーのことは必ず「${nick}」と呼んでください。「あなた」「ユーザーさん」などは使わない。`);
+  }
   lines.push("大前提として、あなたの役割はまず褒めることです。どんな記録でも良かった点を具体的に見つけ、そこから話し始めてください。食べすぎた日でも責めず、改善は「もっと良くなる提案」として前向きに伝えてください。");
+  lines.push("見出しから最後のひとことまで、全部このギャルの口調で統一してください。丁寧語には戻らないこと。");
   lines.push("必ず次の順で答えてください:");
   lines.push("1. 今日のPFCバランスを100点満点で採点(点数と、まず良かった点を具体的に褒める)");
   lines.push("2. 今日の残りの食事プラン:何をどれくらい食べるか(コンビニで買える具体例つき)");
@@ -862,7 +952,7 @@ $("copyPromptBtn").addEventListener("click", async () => {
   const text = $("promptBox").textContent;
   try {
     await navigator.clipboard.writeText(text);
-    toast("コピーしました。Claudeに貼り付けてください ✨");
+    toast("コピったよ〜✨ Claudeに貼ってみて!");
   } catch {
     // クリップボードAPIが使えない環境向けフォールバック
     const ta = document.createElement("textarea");
@@ -871,7 +961,7 @@ $("copyPromptBtn").addEventListener("click", async () => {
     ta.select();
     document.execCommand("copy");
     ta.remove();
-    toast("コピーしました ✨");
+    toast("コピったよ〜✨");
   }
 });
 
@@ -901,8 +991,56 @@ $("saveAdviceBtn").addEventListener("click", () => {
 
 /* ==================== 設定 ==================== */
 
+/* ---- ギャルタイプの選択カード ----
+   プレビューは本体のSVGを複製して作る。defs と title は複製しない
+   (id が重複するため)。グラデーションはタイプに依存しない固定色なので、
+   複製側は本体の defs をそのまま参照して問題ない。 */
+let pendingGalType = settings.galType;
+
+function makeGalPreview(typeCls) {
+  const svg = $("gal").cloneNode(true);
+  svg.querySelector("defs")?.remove();
+  svg.querySelector("title")?.remove();
+  svg.removeAttribute("id");
+  svg.removeAttribute("aria-labelledby");
+  svg.setAttribute("aria-hidden", "true");
+  svg.setAttribute("class", `gal ${typeCls} tier-2 body-normal mood-happy`);
+  return svg;
+}
+
+function renderTypePicker() {
+  const box = $("typePicker");
+  box.innerHTML = "";
+  for (const t of GAL_TYPES) {
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className = "type-card" + (t.id === pendingGalType ? " on" : "");
+
+    const stage = document.createElement("span");
+    stage.className = "type-stage";
+    stage.appendChild(makeGalPreview(t.cls));
+    card.appendChild(stage);
+
+    const name = document.createElement("span");
+    name.className = "type-name";
+    name.textContent = t.name;
+    card.appendChild(name);
+
+    card.addEventListener("click", () => {
+      pendingGalType = t.id;
+      renderTypePicker();
+    });
+    box.appendChild(card);
+  }
+  const picked = GAL_TYPES.find((t) => t.id === pendingGalType) || GAL_TYPES[0];
+  $("typeCatch").textContent = picked.catch;
+}
+
 $("settingsBtn").addEventListener("click", () => {
   $("goalInput").value = settings.goal;
+  $("nickInput").value = settings.nickname || "";
+  pendingGalType = settings.galType;
+  renderTypePicker();
   const b = backend.cfg();
   $("backendUrl").value = b.url;
   $("backendToken").value = b.token;
@@ -913,8 +1051,8 @@ $("settingsBtn").addEventListener("click", () => {
   if (stats) {
     note.hidden = false;
     note.textContent =
-      `AI推定を ${stats.used} 回使用 / 平均誤差 ±${stats.avgErr}%(カロリー)` +
-      ` ・ ±15%以内 ${stats.within} 回。手直しは次回の推定に反映されます。`;
+      `AIに ${stats.used} 回出してもらって、カロリーの平均ズレは ±${stats.avgErr}%。` +
+      ` ±15%以内が ${stats.within} 回だったよ〜。直してくれた分は次回にちゃんと反映されるから安心して🙆‍♀️`;
   } else {
     note.hidden = true;
   }
@@ -924,17 +1062,17 @@ $("settingsBtn").addEventListener("click", () => {
 $("testBackendBtn").addEventListener("click", async () => {
   const url = $("backendUrl").value.trim();
   const token = $("backendToken").value.trim();
-  if (!url) { toast("URLを入力してください"); return; }
+  if (!url) { toast("URL入れてから押して〜🙏"); return; }
   backend.save(url, token); // ping前に一時保存
   const btn = $("testBackendBtn");
   btn.disabled = true;
   const original = btn.textContent;
-  btn.textContent = "テスト中…";
+  btn.textContent = "試してる…";
   try {
     await backend.ping();
     toast("つながったじゃん✅");
   } catch (err) {
-    toast("接続失敗: " + err.message);
+    toast("つながらんかった…" + err.message);
   } finally {
     btn.disabled = false;
     btn.textContent = original;
@@ -944,11 +1082,13 @@ $("testBackendBtn").addEventListener("click", async () => {
 $("settingsForm").addEventListener("submit", (e) => {
   e.preventDefault();
   settings.goal = Number($("goalInput").value) || 2000;
+  settings.nickname = $("nickInput").value.trim().slice(0, 12);
+  settings.galType = pendingGalType;
   saveSettings();
   backend.save($("backendUrl").value, $("backendToken").value);
   closeSheet("settingsOverlay");
   refreshHome();
-  toast("設定セーブしたよ💾");
+  toast(settings.nickname ? `${settings.nickname}、セーブしたよ💾` : "セーブしたよ💾");
 });
 
 /* ==================== 起動 ==================== */

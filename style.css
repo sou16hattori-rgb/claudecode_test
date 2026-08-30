@@ -111,84 +111,195 @@ body {
   overflow: hidden;
 }
 
+/* ギャル本体。タイプごとの色はすべてカスタムプロパティで持たせているので、
+   .gal.type-xxx で変数を上書きするだけでタイプを増やせる。
+   グラデーション(#shadeG など)は文書内に1つしかないぶん全インスタンス共通に
+   なるため、タイプで変わる色は必ず flat fill + var() 側で表現する。 */
 .gal {
   display: block;
   width: 100%; height: 100%;
   animation: idle 3.4s ease-in-out infinite;
+
+  /* 王道ギャル(デフォルト):日焼け肌 × 金髪ウェーブ × ピンク */
+  --hair1: #fbe4ab; --hair2: #e0b86a; --hair3: #b8862f;
+  --hair-strand: #8a5c1f;
+  --skin2: #eebd93;   --shade: #bd7c50;
+  --skin-line: #c98a5f;
+  --blush: #ff7a9e;
+  --iris1: #c79a63; --iris2: #8a5c30; --iris3: #3a220f;
+  --lip: #d0596f; --lip-hi: #e0798c;
+  --top1: #ff9ec8; --top2: #f2559a;
+  --liner: #2b1720;
+  --brow: #9c6a33;
+  --metal: #ffc93c;
 }
 @keyframes idle {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-2.5px); }
 }
 
+/* ---- タイプ:ナチュラル系(明るい肌 × ブラウンのゆるウェーブ × カーデ) ---- */
+.gal.type-natural {
+  --hair1: #e8cba2; --hair2: #b98a5c; --hair3: #7a5130;
+  --hair-strand: #6b452a;
+  --skin2: #f4d0b0;   --shade: #c48f66;
+  --skin-line: #cf9a72;
+  --blush: #ff9a9a;
+  --iris1: #b58a5e; --iris2: #7a5230; --iris3: #33200f;
+  --lip: #cf7f83; --lip-hi: #dd9a9c;
+  --top1: #fdf1de; --top2: #e9d7ba;
+  --liner: #3a2a22;
+  --brow: #8c6440;
+}
+/* ---- タイプ:モード系(プラチナブロンド × 黒ジャケ × 濃いめメイク) ---- */
+.gal.type-mode {
+  --hair1: #fdf7ec; --hair2: #e2d9c9; --hair3: #b3a795;
+  --hair-strand: #9c8f7d;
+  --skin2: #eccdba;   --shade: #a87a5f;
+  --skin-line: #bc8a6e;
+  --blush: #d98e8e;
+  --iris1: #9b8b7d; --iris2: #5d4c40; --iris3: #241a14;
+  --lip: #b8555f; --lip-hi: #c8737c;
+  --top1: #4a4550; --top2: #201d26;
+  --liner: #171017;
+  --brow: #7a6c60;
+  --metal: #ece6da;
+}
+/* ---- タイプ:姉御ギャル(黒髪ロング × 濃いめの日焼け × ラベンダー) ---- */
+.gal.type-ane {
+  --hair1: #5c4b53; --hair2: #33262e; --hair3: #191016;
+  --hair-strand: #120c10;
+  --skin2: #dfa87c;   --shade: #a06840;
+  --skin-line: #b0764c;
+  --blush: #ff6f92;
+  --iris1: #8f6a4e; --iris2: #4f3624; --iris3: #1d120a;
+  --lip: #c34a68; --lip-hi: #d46c84;
+  --top1: #c9a6ff; --top2: #8f5df0;
+  --liner: #150e13;
+  --brow: #3b2a30;
+}
+
 /* ---- 髪 ---- */
-.gal .hair { fill: url(#hairBlonde); }
-/* 毛流れ:白/黒の半透明なので、髪の色が変わってもそのまま馴染む */
+.gal .hair { fill: var(--hair2); }
+.gal .hair-hi { fill: var(--hair1); opacity: .32; }
+.gal .hair-lo { fill: var(--hair3); opacity: .45; }
+.gal .hair-shine { fill: url(#hairShineG); }
+/* 毛流れ:半透明なので髪の色が変わってもそのまま馴染む */
 .gal .strand { fill: none; stroke-linecap: round; }
-.gal .strand.light { stroke: #fff; stroke-width: 2.2; opacity: .3; }
-.gal .strand.dark { stroke: #8a5c1f; stroke-width: 1.8; opacity: .22; }
-/* インナーカラー */
+.gal .strand.light { stroke: #fff; stroke-width: 2.2; opacity: .28; }
+.gal .strand.dark { stroke: var(--hair-strand); stroke-width: 1.8; opacity: .22; }
+/* インナーカラー(なかよし度 Lv6〜) */
+.gal .streak { display: none; }
 .gal .streak.pink { fill: #ff86c6; opacity: .75; }
 .gal .streak.blue { fill: #7fd0ef; opacity: .7; }
+/* 髪型:ロング / ミディアム */
+.gal .hair-mid { display: none; }
+.gal.type-natural .hair-long { display: none; }
+.gal.type-natural .hair-mid { display: block; }
 
 /* ---- 肌 ---- */
 .gal .face,
 .gal .neck,
-.gal .ear { fill: url(#skinG); }
-.gal .neck-shadow { fill: #c6845a; opacity: .5; }
-.gal .ear { stroke: #cf9163; stroke-width: .8; }
-.gal .top { fill: url(#topG); }
-.gal .top-neckline { fill: #eab388; }
+.gal .ear,
+.gal .skin-body,
+.gal .skin-cut { fill: var(--skin2); }
+.gal .shade { fill: url(#shadeG); }
+.gal .light { fill: url(#lightG); }
+.gal .blush ellipse { fill: var(--blush); }
+.gal .neck-shadow { fill: var(--shade); opacity: .45; }
+.gal .ear { stroke: var(--skin-line); stroke-width: .8; opacity: .95; }
+.gal .clavicle {
+  fill: none; stroke: var(--skin-line);
+  stroke-width: 1.1; stroke-linecap: round; opacity: .45;
+}
+
+/* ---- 服 ---- */
+.gal .top, .gal .cardi, .gal .blazer { fill: var(--top2); }
+.gal .top-hi { fill: var(--top1); opacity: .7; }
+.gal .cardi-lapel { fill: #fff; opacity: .5; }
+.gal .cardi-rib {
+  fill: none; stroke: #cbb69a;
+  stroke-width: 1.2; opacity: .5;
+}
+.gal .lapel { fill: #fff; opacity: .12; }
+.gal .outfit-cardi, .gal .outfit-blazer { display: none; }
+.gal.type-natural .outfit-top { display: none; }
+.gal.type-natural .outfit-cardi { display: block; }
+.gal.type-mode .outfit-top { display: none; }
+.gal.type-mode .outfit-blazer { display: block; }
+
 .gal .chain {
-  fill: none; stroke: var(--gold);
+  fill: none; stroke: var(--metal);
   stroke-width: 1.2; opacity: .95;
 }
-.gal .pendant { fill: var(--gold); }
+.gal .pendant { fill: var(--metal); }
 
 /* ---- 目もと(盛りメイク) ---- */
 .gal .lid-shadow { fill: url(#lidG); }
 .gal .sclera { fill: #fffdfa; }
-.gal .iris { fill: url(#irisG); }
-.gal .limbal { fill: none; stroke: #2e1a0c; stroke-width: 1.5; opacity: .8; }
-.gal .pupil { fill: #1c0f07; }
+/* まぶたが眼球に落とす影。これがあると目が球に見える */
+.gal .sclera-shade { fill: #b8968c; opacity: .32; }
+.gal .iris { fill: var(--iris2); }
+.gal .iris-lit { fill: var(--iris1); opacity: .55; }
+.gal .limbal { fill: none; stroke: var(--iris3); stroke-width: 1.6; opacity: .85; }
+.gal .pupil { fill: #170c05; }
 .gal .glint { fill: #fff; opacity: .95; }
-.gal .glint.sm { opacity: .75; }
+.gal .glint.sm { opacity: .7; }
 .gal .liner {
-  fill: none; stroke: #2c1820;
+  fill: none; stroke: var(--liner);
   stroke-width: 3.4; stroke-linecap: round;
 }
-.gal .wing { fill: #2c1820; }
+.gal .liner.low { stroke-width: 1.5; opacity: .75; }
+.gal .crease {
+  fill: none; stroke: var(--skin-line);
+  stroke-width: 1.1; stroke-linecap: round; opacity: .55;
+}
+.gal .wing { fill: var(--liner); }
 .gal .lash {
-  fill: none; stroke: #2c1820;
+  fill: none; stroke: var(--liner);
   stroke-width: 1.9; stroke-linecap: round;
 }
-.gal .lash.sm { stroke-width: 1.2; opacity: .8; }
 /* 涙袋(強すぎると隈に見えるので控えめに) */
-.gal .tear-bag { fill: #fff4e6; opacity: .5; }
+.gal .tear-bag { fill: #fff4e6; opacity: .45; }
 .gal .tear-line {
-  fill: none; stroke: #cf9a76;
-  stroke-width: .9; stroke-linecap: round; opacity: .35;
+  fill: none; stroke: var(--skin-line);
+  stroke-width: .9; stroke-linecap: round; opacity: .28;
 }
 .gal .happy-eye {
-  fill: none; stroke: #2c1820;
-  stroke-width: 3.4; stroke-linecap: round;
+  fill: none; stroke: var(--liner);
+  stroke-width: 2.9; stroke-linecap: round;
 }
-.gal .brow {
-  fill: none; stroke: #9c6a33;
-  stroke-width: 3.2; stroke-linecap: round;
-}
+.gal .brow { fill: var(--brow); opacity: .92; }
 
 /* ---- 鼻・口 ---- */
-.gal .nose-shade {
-  fill: none; stroke: #cf9163;
-  stroke-width: 1.4; stroke-linecap: round; opacity: .55;
+.gal .nose-bridge {
+  fill: none; stroke: #fff5ea;
+  stroke-width: 2.2; stroke-linecap: round; opacity: .2;
 }
-.gal .lip { fill: #d4536f; }
+.gal .nose-shade {
+  fill: none; stroke: var(--shade);
+  stroke-width: 1.4; stroke-linecap: round; opacity: .26;
+}
+.gal .nose-tip {
+  fill: none; stroke: var(--skin-line);
+  stroke-width: 1.1; stroke-linecap: round; opacity: .4;
+}
+.gal .nostril { fill: var(--shade); opacity: .4; }
+.gal .philtrum {
+  fill: none; stroke: var(--skin-line);
+  stroke-width: .8; stroke-linecap: round; opacity: .28;
+}
+.gal .lip { fill: var(--lip); }
+.gal .lip.up { fill: var(--lip); }
+.gal .lip.low { fill: var(--lip-hi); }
+.gal .lip-line {
+  fill: none; stroke: #8f3145;
+  stroke-width: .9; stroke-linecap: round; opacity: .55;
+}
 .gal .teeth { fill: #fffaf8; }
-.gal .gloss { fill: #fff; opacity: .45; }
-.gal .blush { fill: #ff7a9e; opacity: .34; }
+.gal .gloss { fill: #fff; opacity: .5; }
 .gal .earrings circle {
-  fill: none; stroke: var(--gold);
+  fill: none; stroke: var(--metal);
   stroke-width: 2.2;
 }
 
@@ -246,14 +357,16 @@ body {
 .gal.body-chubby .chin-fold { display: block; }
 .gal.body-chubby .fx-sweat { display: block; }
 
-/* ---- なかよし度(レベル)で見た目アップ ---- */
-.gal:not(.tier-1) .earrings { display: block; }          /* Lv3〜 フープピアス */
-.gal.tier-3 .hair, .gal.tier-4 .hair { fill: url(#hairBright); }  /* Lv6〜 明るい髪 */
+/* ---- なかよし度(レベル)で見た目アップ ----
+   タイプごとの配色を壊さないよう、レベルでは「盛り」だけを足していく */
+.gal:not(.tier-1) .earrings { display: block; }                    /* Lv3〜 フープピアス */
+.gal.tier-3 .streak, .gal.tier-4 .streak, .gal.tier-5 .streak { display: block; } /* Lv6〜 インナーカラー */
 .gal.tier-4 .tiara, .gal.tier-5 .tiara { display: block; }        /* Lv10〜 ティアラ */
 .gal .tiara path { fill: var(--gold); stroke: #d9a01f; stroke-width: 1; }
 .gal .tiara circle { fill: #fff0f6; }
-.gal.tier-5 .hair { fill: url(#hairPink); }              /* Lv15 伝説 */
-.gal.tier-5 .top { fill: url(#topGLegend); }
+.gal.tier-5 { --metal: #fff0a8; }                                  /* Lv15 伝説 */
+.gal.tier-5 .hair-shine { opacity: 1; }
+.gal.tier-5 .fx-sparkle { display: block; animation: twinkle 1.8s ease-in-out infinite; }
 
 .gal .fx { font-size: 15px; }
 
@@ -640,6 +753,43 @@ body {
   color: var(--pink-deep);
   font-weight: 700;
 }
+
+/* ---------- ギャルタイプ選択 ---------- */
+.type-picker {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.type-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 4px 8px;
+  border: 2px solid var(--line);
+  border-radius: 16px;
+  background: var(--card2);
+  font: inherit;
+  color: var(--muted);
+  cursor: pointer;
+}
+.type-card.on {
+  border-color: var(--pink);
+  background: #fff;
+  color: var(--pink-deep);
+  box-shadow: var(--shadow);
+}
+.type-stage {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1.18;
+  border-radius: 11px;
+  overflow: hidden;
+  background: linear-gradient(180deg, #fff4f9 0%, #ffe4f0 100%);
+}
+.type-stage .gal { animation: none; }
+.type-name { font-size: 10px; font-weight: 700; line-height: 1.3; text-align: center; }
+.type-catch { margin: 9px 0 0; font-size: 11px; color: var(--muted); }
 
 /* ---------- toast ---------- */
 .toast {

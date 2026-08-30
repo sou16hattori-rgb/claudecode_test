@@ -25,222 +25,331 @@
       <!-- ギャルコーチ -->
       <section class="avatar-card" id="avatarCard">
         <div class="gal-stage">
+          <!--
+            ギャルの立ち絵。画像ファイルは使わず、インラインSVGを CSS クラスで
+            出し分けている(タイプ4種 × 表情4種 × 体型3種 × なかよし度5段階)。
+            色は CSS カスタムプロパティで持たせているので、タイプを足すときは
+            style.css に .gal.type-xxx の変数セットを書くだけで増やせる。
+          -->
           <svg class="gal" id="gal" viewBox="0 0 140 170" xmlns="http://www.w3.org/2000/svg"
                role="img" aria-labelledby="galTitle">
             <title id="galTitle">ギャルコーチ</title>
+            <!--
+              defs はタイプに依存しない固定色だけにしてある。
+              CSS の fill: url(#…) は文書内で最初に見つかった同一idを参照するため、
+              グラデーションの色をタイプ変数に依存させると複製したプレビューが
+              すべて元のSVGの色になってしまう。タイプ差は flat fill + var() で出す。
+            -->
             <defs>
-              <linearGradient id="hairBlonde" x1=".2" y1="0" x2=".8" y2="1">
-                <stop offset="0%" stop-color="#fbe4ab" />
-                <stop offset="40%" stop-color="#e6bf72" />
-                <stop offset="100%" stop-color="#c2913f" />
+              <linearGradient id="hairShineG" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#fff" stop-opacity="0" />
+                <stop offset="45%" stop-color="#fff" stop-opacity=".3" />
+                <stop offset="100%" stop-color="#fff" stop-opacity="0" />
               </linearGradient>
-              <linearGradient id="hairBright" x1=".2" y1="0" x2=".8" y2="1">
-                <stop offset="0%" stop-color="#fff3cd" />
-                <stop offset="40%" stop-color="#f4d488" />
-                <stop offset="100%" stop-color="#d8a851" />
-              </linearGradient>
-              <linearGradient id="hairPink" x1=".2" y1="0" x2=".8" y2="1">
-                <stop offset="0%" stop-color="#ffe2f5" />
-                <stop offset="40%" stop-color="#eda6e2" />
-                <stop offset="100%" stop-color="#c069cf" />
-              </linearGradient>
-              <!-- 日焼けした肌 -->
-              <linearGradient id="skinG" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#f5cfa8" />
-                <stop offset="60%" stop-color="#eab88b" />
-                <stop offset="100%" stop-color="#dca575" />
-              </linearGradient>
-              <linearGradient id="topG" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#ff9ec8" />
-                <stop offset="100%" stop-color="#f2559a" />
-              </linearGradient>
-              <linearGradient id="topGLegend" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#cdb0ff" />
-                <stop offset="100%" stop-color="#9a6df0" />
-              </linearGradient>
-              <!-- カラコン風の瞳 -->
-              <radialGradient id="irisG" cx="50%" cy="32%" r="70%">
-                <stop offset="0%" stop-color="#c79a63" />
-                <stop offset="55%" stop-color="#8a5c30" />
-                <stop offset="100%" stop-color="#3d2411" />
+              <!-- 陰影(頬骨の下・こめかみ・あご) -->
+              <radialGradient id="shadeG" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#8f5a33" stop-opacity=".24" />
+                <stop offset="62%" stop-color="#8f5a33" stop-opacity=".10" />
+                <stop offset="100%" stop-color="#8f5a33" stop-opacity="0" />
               </radialGradient>
-              <!-- グラデーションアイシャドウ -->
+              <!-- ハイライト(額・鼻筋・あご先) -->
+              <radialGradient id="lightG" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#fff8f0" stop-opacity=".42" />
+                <stop offset="100%" stop-color="#fff8f0" stop-opacity="0" />
+              </radialGradient>
               <linearGradient id="lidG" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#c96a86" stop-opacity=".55" />
-                <stop offset="100%" stop-color="#e2a07f" stop-opacity="0" />
+                <stop offset="0%" stop-color="#a35f70" stop-opacity=".4" />
+                <stop offset="100%" stop-color="#a35f70" stop-opacity="0" />
               </linearGradient>
               <clipPath id="stageClip"><rect x="0" y="0" width="140" height="170" /></clipPath>
               <clipPath id="eyeL">
-                <path d="M47 62 C50 54.5 62 54.5 65 61 C62.5 68.8 49.2 68.8 47 62 Z" />
+                <path d="M47 61.8 C50.4 53.6 61.6 53 65 61.2 C62.2 68.4 50 68.6 47 61.8 Z" />
               </clipPath>
               <clipPath id="eyeR">
-                <path d="M93 62 C90 54.5 78 54.5 75 61 C77.5 68.8 90.8 68.8 93 62 Z" />
+                <path d="M93 61.8 C89.6 53.6 78.4 53 75 61.2 C77.8 68.4 90 68.6 93 61.8 Z" />
               </clipPath>
             </defs>
 
             <g clip-path="url(#stageClip)">
-              <!-- ===== 後ろ髪(ウェーブのある輪郭) ===== -->
-              <path class="hair hair-back" d="M70 6
-                       C104 6 121 30 117 60 C115 75 124 86 119 102
-                       C115 118 125 132 120 150 C118 159 119 165 119 170
-                       L21 170 C21 165 22 159 20 150
-                       C15 132 25 118 21 102 C16 86 25 75 23 60
-                       C19 30 36 6 70 6 Z" />
-              <!-- インナーカラー(毛先だけ覗く) -->
-              <path class="streak pink" d="M33 96 C30 112 35 126 32 144 C30 154 34 161 33 170
-                       L39 170 C40 161 36 154 38 144 C41 126 36 112 39 96 Z" />
-              <path class="streak blue" d="M107 100 C110 116 105 130 108 148 C110 158 106 164 107 170
-                       L101 170 C100 164 104 158 102 148 C99 130 104 116 101 100 Z" />
-              <!-- 毛流れ -->
-              <path class="strand light" d="M28 40 C22 62 30 84 25 106 C21 124 28 142 25 164" />
-              <path class="strand dark" d="M36 46 C31 64 38 84 33 106 C29 124 35 142 33 162" />
-              <path class="strand light" d="M112 44 C118 64 110 84 115 106 C119 124 112 142 115 164" />
-              <path class="strand dark" d="M104 50 C109 66 102 86 107 106 C111 124 105 142 107 162" />
 
-              <!-- ===== 首・肩 ===== -->
-              <path class="neck" d="M59 86 L59 110 C59 115 81 115 81 110 L81 86 Z" />
-              <path class="neck-shadow" d="M59 86 L81 86 L81 96 C74 102 66 102 59 96 Z" />
-
-              <g class="torso">
-                <path class="top" d="M70 106 C85 106 94 111 100 118 C108 127 112 143 114 170 L26 170
-                         C28 143 32 127 40 118 C46 111 55 106 70 106 Z" />
-                <path class="top-neckline" d="M57 107 C61 117 79 117 83 107 C79 103 61 103 57 107 Z" />
-                <!-- 重ねづけネックレス -->
-                <path class="chain" d="M56 110 C60 119 80 119 84 110" />
-                <path class="chain" d="M53 110 C58 124 82 124 87 110" />
-                <circle class="pendant" cx="70" cy="123.5" r="2.6" />
+              <!-- ===== 後ろ髪:ロング(王道 / モード / 姉御) ===== -->
+              <g class="hair-long">
+                <path class="hair back" d="M70 6
+                         C104 6 121 30 117 60 C115 75 124 86 119 102
+                         C115 118 125 132 120 150 C118 159 119 165 119 170
+                         L21 170 C21 165 22 159 20 150
+                         C15 132 25 118 21 102 C16 86 25 75 23 60
+                         C19 30 36 6 70 6 Z" />
+                <!-- 毛先に落ちる影(髪の色を1トーン落として奥行きを出す) -->
+                <path class="hair-lo" d="M20.5 106 C24 128 16 150 21 170 L119 170
+                         C124 150 116 128 119.5 106 C112 122 98 130 70 130 C42 130 28 122 20.5 106 Z" />
+                <path class="streak pink" d="M31 132 C29 144 33 155 32 170 L37 170
+                         C38 155 34 144 36 132 Z" />
+                <path class="streak blue" d="M109 136 C111 148 107 158 108 170 L103 170
+                         C102 158 106 148 104 136 Z" />
+                <path class="strand light" d="M28 40 C22 62 30 84 25 106 C21 124 28 142 25 164" />
+                <path class="strand dark" d="M36 46 C31 64 38 84 33 106 C29 124 35 142 33 162" />
+                <path class="strand light" d="M112 44 C118 64 110 84 115 106 C119 124 112 142 115 164" />
+                <path class="strand dark" d="M104 50 C109 66 102 86 107 106 C111 124 105 142 107 162" />
               </g>
 
-              <!-- 耳 -->
-              <ellipse class="ear" cx="42" cy="64" rx="5.2" ry="7.5" />
-              <ellipse class="ear" cx="98" cy="64" rx="5.2" ry="7.5" />
+              <!-- ===== 後ろ髪:ミディアム(ナチュラル系) ===== -->
+              <g class="hair-mid">
+                <path class="hair back" d="M70 8
+                         C101 8 118 30 114 60 C112 76 120 90 116 106
+                         C113 121 104 132 92 136 C86 138 80 133 70 133
+                         C60 133 54 138 48 136 C36 132 27 121 24 106
+                         C20 90 28 76 26 60 C22 30 39 8 70 8 Z" />
+                <path class="hair-lo" d="M24 104 C27 120 36 132 48 136 C54 138 60 133 70 133
+                         C80 133 86 138 92 136 C104 132 113 120 116 104
+                         C108 118 92 123 70 123 C48 123 32 118 24 104 Z" />
+                <path class="streak pink" d="M30 116 C29 124 32 130 33 134 L38 131
+                         C36 127 34 123 35 116 Z" />
+                <path class="strand light" d="M29 42 C24 62 31 82 28 102 C26 114 30 124 32 130" />
+                <path class="strand dark" d="M37 48 C33 66 39 84 36 102 C34 113 37 122 39 128" />
+                <path class="strand light" d="M111 46 C116 64 109 84 112 102 C114 114 110 124 108 130" />
+                <path class="strand dark" d="M103 52 C107 68 101 86 104 102 C106 113 103 122 101 128" />
+              </g>
+
+              <!-- ===== 首 ===== -->
+              <path class="neck" d="M59 86 L59 110 C59 116 81 116 81 110 L81 86 Z" />
+              <path class="neck-shadow" d="M59 86 L81 86 L81 97 C74 103 66 103 59 97 Z" />
+
+              <!-- ===== 上半身 ===== -->
+              <g class="torso">
+                <!-- 素肌のシルエット(服はこの上に重ねる) -->
+                <path class="skin-body" d="M70 104 C86 104 96 110 102 118
+                         C110 128 114 146 116 170 L24 170
+                         C26 146 30 128 38 118 C44 110 54 104 70 104 Z" />
+
+                <!-- 王道 / 姉御:クロップトップ -->
+                <g class="outfit-top">
+                  <path class="top" d="M70 104 C86 104 96 110 102 118
+                           C110 128 114 146 116 170 L24 170
+                           C26 146 30 128 38 118 C44 110 54 104 70 104 Z" />
+                  <path class="top-hi" d="M70 104 C84 104 93 108 99 115
+                           C88 124 52 124 41 115 C47 108 56 104 70 104 Z" />
+                  <path class="skin-cut" d="M53 105 C57 121 83 121 87 105 C79 101 61 101 53 105 Z" />
+                </g>
+
+                <!-- ナチュラル系:カーディガン -->
+                <g class="outfit-cardi">
+                  <path class="cardi" d="M70 104 C86 104 96 110 102 118
+                           C110 128 114 146 116 170 L24 170
+                           C26 146 30 128 38 118 C44 110 54 104 70 104 Z" />
+                  <path class="top-hi" d="M70 104 C84 104 93 108 99 115
+                           C88 124 52 124 41 115 C47 108 56 104 70 104 Z" />
+                  <path class="skin-cut" d="M56 104 L70 134 L84 104 C78 100.5 62 100.5 56 104 Z" />
+                  <path class="cardi-lapel" d="M56 104 L70 134 L67.5 139 L51 106 Z" />
+                  <path class="cardi-lapel" d="M84 104 L70 134 L72.5 139 L89 106 Z" />
+                  <path class="cardi-rib" d="M40 130 C42 146 42 158 41 170" />
+                  <path class="cardi-rib" d="M100 130 C98 146 98 158 99 170" />
+                </g>
+
+                <!-- モード系:ジャケット -->
+                <g class="outfit-blazer">
+                  <path class="blazer" d="M70 104 C86 104 96 110 102 118
+                           C110 128 114 146 116 170 L24 170
+                           C26 146 30 128 38 118 C44 110 54 104 70 104 Z" />
+                  <path class="top-hi" d="M70 104 C84 104 93 108 99 115
+                           C88 124 52 124 41 115 C47 108 56 104 70 104 Z" />
+                  <path class="skin-cut" d="M57 104 L70 130 L83 104 C77 100.5 63 100.5 57 104 Z" />
+                  <path class="lapel" d="M57 104 L70 130 L66.5 135 L50 107 Z" />
+                  <path class="lapel" d="M83 104 L70 130 L73.5 135 L90 107 Z" />
+                </g>
+
+                <!-- 鎖骨 -->
+                <path class="clavicle" d="M58.5 110.5 C62.5 113.6 66 114.6 69 114.8" />
+                <path class="clavicle" d="M81.5 110.5 C77.5 113.6 74 114.6 71 114.8" />
+
+                <!-- 重ねづけネックレス -->
+                <path class="chain" d="M56 108 C60 117 80 117 84 108" />
+                <path class="chain" d="M53 108 C58 123 82 123 87 108" />
+                <circle class="pendant" cx="70" cy="122.5" r="2.6" />
+              </g>
+
+              <!-- 耳(髪の内側) -->
+              <ellipse class="ear" cx="42.5" cy="64" rx="5" ry="7.6" />
+              <ellipse class="ear" cx="97.5" cy="64" rx="5" ry="7.6" />
 
               <!-- ===== 顔 ===== -->
               <g class="face-group">
-                <path class="face" d="M70 20 C91 20 99 36 99 57 C99 78 92 95 70 103
-                         C48 95 41 78 41 57 C41 36 49 20 70 20 Z" />
+                <path class="face" d="M70 16
+                         C86 16 97.5 27 99 45 C100 57.5 98.5 66 96.5 74
+                         C93.5 86 84 97.5 70 104.5
+                         C56 97.5 46.5 86 43.5 74 C41.5 66 40 57.5 41 45
+                         C42.5 27 54 16 70 16 Z" />
 
-                <!-- チーク(斜めに入れるギャル塗り) -->
-                <ellipse class="blush" cx="50" cy="72" rx="8.4" ry="4.4" transform="rotate(-12 50 72)" />
-                <ellipse class="blush" cx="90" cy="72" rx="8.4" ry="4.4" transform="rotate(12 90 72)" />
+                <!-- 立体感:こめかみ・エラ・頬骨の下に影、額と鼻筋に光 -->
+                <ellipse class="shade" cx="44" cy="46" rx="7.5" ry="16" />
+                <ellipse class="shade" cx="96" cy="46" rx="7.5" ry="16" />
+                <ellipse class="shade" cx="50" cy="87" rx="7" ry="9" transform="rotate(-24 50 87)" />
+                <ellipse class="shade" cx="90" cy="87" rx="7" ry="9" transform="rotate(24 90 87)" />
+                <ellipse class="light" cx="70" cy="34" rx="17" ry="9" />
+                <ellipse class="light" cx="70" cy="64" rx="3.5" ry="11" />
+                <ellipse class="light" cx="70" cy="99" rx="6" ry="4.5" />
+
+                <!-- チーク(斜め入れのギャル塗り)。ぼかしフィルタは使えないので
+                     同心の楕円を薄く重ねてグラデーションのように見せる -->
+                <g class="blush">
+                  <ellipse cx="51.5" cy="73" rx="11" ry="6.8" opacity=".13" transform="rotate(-14 51.5 73)" />
+                  <ellipse cx="51.5" cy="73" rx="8.4" ry="5.1" opacity=".15" transform="rotate(-14 51.5 73)" />
+                  <ellipse cx="51.5" cy="73" rx="5.8" ry="3.4" opacity=".17" transform="rotate(-14 51.5 73)" />
+                  <ellipse cx="88.5" cy="73" rx="11" ry="6.8" opacity=".13" transform="rotate(14 88.5 73)" />
+                  <ellipse cx="88.5" cy="73" rx="8.4" ry="5.1" opacity=".15" transform="rotate(14 88.5 73)" />
+                  <ellipse cx="88.5" cy="73" rx="5.8" ry="3.4" opacity=".17" transform="rotate(14 88.5 73)" />
+                </g>
 
                 <!-- ===== 目(通常) ===== -->
                 <g class="eyes-open">
-                  <!-- アイシャドウ -->
-                  <ellipse class="lid-shadow" cx="56" cy="56.5" rx="10.5" ry="5" transform="rotate(-7 56 56.5)" />
-                  <ellipse class="lid-shadow" cx="84" cy="56.5" rx="10.5" ry="5" transform="rotate(7 84 56.5)" />
+                  <ellipse class="lid-shadow" cx="56" cy="56" rx="10.8" ry="5.4" transform="rotate(-8 56 56)" />
+                  <ellipse class="lid-shadow" cx="84" cy="56" rx="10.8" ry="5.4" transform="rotate(8 84 56)" />
 
-                  <!-- 眼球(クリップ) -->
                   <g clip-path="url(#eyeL)">
                     <rect class="sclera" x="45" y="52" width="22" height="19" />
-                    <circle class="iris" cx="56" cy="61.4" r="5.5" />
-                    <circle class="limbal" cx="56" cy="61.4" r="5.5" />
-                    <circle class="pupil" cx="56" cy="61.4" r="2.4" />
-                    <circle class="glint" cx="53.9" cy="58.9" r="2" />
-                    <circle class="glint sm" cx="58.4" cy="64" r="1.05" />
+                    <ellipse class="sclera-shade" cx="56" cy="56.4" rx="11" ry="4" />
+                    <circle class="iris" cx="56" cy="61.2" r="5.6" />
+                    <circle class="iris-lit" cx="56" cy="62.6" r="3.6" />
+                    <circle class="limbal" cx="56" cy="61.2" r="5.6" />
+                    <circle class="pupil" cx="56" cy="61.2" r="2.3" />
+                    <circle class="glint" cx="53.7" cy="58.7" r="2.1" />
+                    <circle class="glint sm" cx="58.5" cy="64.2" r="1.1" />
                   </g>
                   <g clip-path="url(#eyeR)">
                     <rect class="sclera" x="73" y="52" width="22" height="19" />
-                    <circle class="iris" cx="84" cy="61.4" r="5.5" />
-                    <circle class="limbal" cx="84" cy="61.4" r="5.5" />
-                    <circle class="pupil" cx="84" cy="61.4" r="2.4" />
-                    <circle class="glint" cx="81.9" cy="58.9" r="2" />
-                    <circle class="glint sm" cx="86.4" cy="64" r="1.05" />
+                    <ellipse class="sclera-shade" cx="84" cy="56.4" rx="11" ry="4" />
+                    <circle class="iris" cx="84" cy="61.2" r="5.6" />
+                    <circle class="iris-lit" cx="84" cy="62.6" r="3.6" />
+                    <circle class="limbal" cx="84" cy="61.2" r="5.6" />
+                    <circle class="pupil" cx="84" cy="61.2" r="2.3" />
+                    <circle class="glint" cx="81.7" cy="58.7" r="2.1" />
+                    <circle class="glint sm" cx="86.5" cy="64.2" r="1.1" />
                   </g>
 
+                  <!-- 二重のライン -->
+                  <path class="crease" d="M48.6 57.2 C52.2 50.4 62 49.8 65.6 57.4" />
+                  <path class="crease" d="M91.4 57.2 C87.8 50.4 78 49.8 74.4 57.4" />
                   <!-- 跳ね上げアイライン -->
-                  <path class="liner" d="M47.2 62.2 C50.2 54.3 62 54.3 65 61" />
-                  <path class="liner" d="M92.8 62.2 C89.8 54.3 78 54.3 75 61" />
-                  <path class="wing" d="M47.8 61 C45.6 59.8 43.4 57.8 41.6 55.4
-                           C44.6 56.9 46.9 58.4 49 59.6 Z" />
-                  <path class="wing" d="M92.2 61 C94.4 59.8 96.6 57.8 98.4 55.4
-                           C95.4 56.9 93.1 58.4 91 59.6 Z" />
+                  <path class="liner" d="M47 61.8 C50.4 53.6 61.6 53 65 61.2" />
+                  <path class="liner" d="M93 61.8 C89.6 53.6 78.4 53 75 61.2" />
+                  <path class="liner low" d="M50 66.4 C53.4 69.4 59.6 69.4 63.4 66.2" />
+                  <path class="liner low" d="M90 66.4 C86.6 69.4 80.4 69.4 76.6 66.2" />
+                  <path class="wing" d="M47.6 60.6 C45.2 59.4 42.8 57.2 41 54.6
+                           C44.2 56.2 46.8 57.8 49 59.2 Z" />
+                  <path class="wing" d="M92.4 60.6 C94.8 59.4 97.2 57.2 99 54.6
+                           C95.8 56.2 93.2 57.8 91 59.2 Z" />
                   <!-- 盛ったまつげ -->
-                  <path class="lash" d="M50.6 56 L49 52.2" />
-                  <path class="lash" d="M55.4 54.4 L54.8 50.8" />
-                  <path class="lash" d="M60.2 54.6 L60.8 51" />
-                  <path class="lash" d="M89.4 56 L91 52.2" />
-                  <path class="lash" d="M84.6 54.4 L85.2 50.8" />
-                  <path class="lash" d="M79.8 54.6 L79.2 51" />
+                  <path class="lash" d="M50.4 55.4 L48.6 51.4" />
+                  <path class="lash" d="M55.2 53.6 L54.6 49.6" />
+                  <path class="lash" d="M60.4 54 L61.2 50.2" />
+                  <path class="lash" d="M89.6 55.4 L91.4 51.4" />
+                  <path class="lash" d="M84.8 53.6 L85.4 49.6" />
+                  <path class="lash" d="M79.6 54 L78.8 50.2" />
                   <!-- 涙袋 -->
-                  <path class="tear-line" d="M49.8 68.6 C53 71.2 59.4 71.2 62.6 68.7" />
-                  <path class="tear-line" d="M90.2 68.6 C87 71.2 80.6 71.2 77.4 68.7" />
-                  <ellipse class="tear-bag" cx="56" cy="69.4" rx="6.4" ry="2" />
-                  <ellipse class="tear-bag" cx="84" cy="69.4" rx="6.4" ry="2" />
+                  <ellipse class="tear-bag" cx="56" cy="70.2" rx="6.6" ry="2" />
+                  <ellipse class="tear-bag" cx="84" cy="70.2" rx="6.6" ry="2" />
+                  <path class="tear-line" d="M50.4 72 C53.6 74 59.4 74 62.6 71.8" />
+                  <path class="tear-line" d="M89.6 72 C86.4 74 80.6 74 77.4 71.8" />
                 </g>
 
                 <!-- ===== 目(ご機嫌:笑い目) ===== -->
                 <g class="eyes-happy">
-                  <ellipse class="lid-shadow" cx="56" cy="57.5" rx="10.5" ry="4.6" transform="rotate(-7 56 57.5)" />
-                  <ellipse class="lid-shadow" cx="84" cy="57.5" rx="10.5" ry="4.6" transform="rotate(7 84 57.5)" />
-                  <path class="happy-eye" d="M48 65 C52 56.5 62 56.5 65.5 64" />
-                  <path class="happy-eye" d="M92 65 C88 56.5 78 56.5 74.5 64" />
-                  <path class="wing" d="M48 63.6 C45.8 62.4 43.6 60.4 41.8 58
-                           C44.8 59.5 47.1 61 49.2 62.2 Z" />
-                  <path class="wing" d="M92 63.6 C94.2 62.4 96.4 60.4 98.2 58
-                           C95.2 59.5 92.9 61 90.8 62.2 Z" />
-                  <path class="lash" d="M50.6 58.6 L49 55" />
-                  <path class="lash" d="M55.8 56.2 L55.4 52.6" />
-                  <path class="lash" d="M89.4 58.6 L91 55" />
-                  <path class="lash" d="M84.2 56.2 L84.6 52.6" />
-                  <ellipse class="tear-bag" cx="56" cy="69" rx="6.2" ry="1.9" />
-                  <ellipse class="tear-bag" cx="84" cy="69" rx="6.2" ry="1.9" />
+                  <ellipse class="lid-shadow" cx="56" cy="57" rx="10.8" ry="5" transform="rotate(-8 56 57)" />
+                  <ellipse class="lid-shadow" cx="84" cy="57" rx="10.8" ry="5" transform="rotate(8 84 57)" />
+                  <path class="happy-eye" d="M48 65 C52 56.2 62 55.8 65.5 64" />
+                  <path class="happy-eye" d="M92 65 C88 56.2 78 55.8 74.5 64" />
+                  <path class="wing" d="M48 63.6 C45.6 62.4 43.2 60.2 41.4 57.6
+                           C44.6 59.2 47.2 60.8 49.4 62.2 Z" />
+                  <path class="wing" d="M92 63.6 C94.4 62.4 96.8 60.2 98.6 57.6
+                           C95.4 59.2 92.8 60.8 90.6 62.2 Z" />
+                  <path class="lash" d="M50.6 58.4 L48.8 54.6" />
+                  <path class="lash" d="M55.8 55.8 L55.4 52" />
+                  <path class="lash" d="M89.4 58.4 L91.2 54.6" />
+                  <path class="lash" d="M84.2 55.8 L84.6 52" />
+                  <ellipse class="tear-bag" cx="56" cy="69.6" rx="6.4" ry="2" />
+                  <ellipse class="tear-bag" cx="84" cy="69.6" rx="6.4" ry="2" />
                 </g>
 
-                <!-- ===== 眉 ===== -->
+                <!-- ===== 眉(細めのアーチ) ===== -->
                 <g class="brows-normal">
-                  <path class="brow" d="M47.5 44.5 C51.5 39 60 39 64 43" />
-                  <path class="brow" d="M92.5 44.5 C88.5 39 80 39 76 43" />
+                  <path class="brow" d="M47.4 46.6 C50.6 40 60.6 38.6 65 42.6
+                           L64.2 44.8 C60.4 41.8 51.6 43 48.8 47.6 Z" />
+                  <path class="brow" d="M92.6 46.6 C89.4 40 79.4 38.6 75 42.6
+                           L75.8 44.8 C79.6 41.8 88.4 43 91.2 47.6 Z" />
                 </g>
                 <g class="brows-worried">
-                  <path class="brow" d="M47.5 46.5 C51.5 42.5 60 39.5 64 38" />
-                  <path class="brow" d="M92.5 46.5 C88.5 42.5 80 39.5 76 38" />
+                  <path class="brow" d="M47.4 48.6 C50.6 43.4 59 39.6 64.6 38.2
+                           L65 40.4 C59.6 41.8 51.8 45.4 48.8 49.6 Z" />
+                  <path class="brow" d="M92.6 48.6 C89.4 43.4 81 39.6 75.4 38.2
+                           L75 40.4 C80.4 41.8 88.2 45.4 91.2 49.6 Z" />
                 </g>
                 <g class="brows-angry">
-                  <path class="brow" d="M47.5 38.5 C51.5 40 60 43 64 46.5" />
-                  <path class="brow" d="M92.5 38.5 C88.5 40 80 43 76 46.5" />
+                  <path class="brow" d="M47.4 39.8 C51 40.8 60.2 43.8 64.8 47.4
+                           L63.8 49.2 C59.4 46 50.6 43.2 48.4 42.2 Z" />
+                  <path class="brow" d="M92.6 39.8 C89 40.8 79.8 43.8 75.2 47.4
+                           L76.2 49.2 C80.6 46 89.4 43.2 91.6 42.2 Z" />
                 </g>
 
-                <!-- 鼻 -->
-                <path class="nose-shade" d="M70.6 71 C72.6 75 72.2 77.8 69.4 78.6" />
+                <!-- ===== 鼻 ===== -->
+                <path class="nose-bridge" d="M70 57 L70 73.5" />
+                <path class="nose-shade" d="M72.4 66 C74.1 70.8 73.6 75.4 71.2 77.4" />
+                <path class="nose-tip" d="M67 77.2 C68.4 79.2 71.6 79.2 73 77.2" />
+                <ellipse class="nostril" cx="66.9" cy="78.6" rx="1.35" ry=".85" transform="rotate(-16 66.9 78.6)" />
+                <ellipse class="nostril" cx="73.1" cy="78.6" rx="1.35" ry=".85" transform="rotate(16 73.1 78.6)" />
+                <path class="philtrum" d="M68.7 80.6 L69 84.2" />
+                <path class="philtrum" d="M71.3 80.6 L71 84.2" />
 
                 <!-- ===== 口 ===== -->
                 <g class="mouths">
                   <g class="m-grin">
-                    <path class="lip" d="M58.5 85 C63.5 81.4 76.5 81.4 81.5 85
-                             C79.6 94 74.6 98.4 70 98.4 C65.4 98.4 60.4 94 58.5 85 Z" />
-                    <path class="teeth" d="M60.8 85.4 C65 83.4 75 83.4 79.2 85.4 L78.3 88.8 L61.7 88.8 Z" />
-                    <ellipse class="gloss" cx="70" cy="94.8" rx="3.8" ry="1.3" />
+                    <path class="lip" d="M59.5 84.8 C63.6 81.8 76.4 81.8 80.5 84.8
+                             C78.8 92.6 74.6 96.4 70 96.4 C65.4 96.4 61.2 92.6 59.5 84.8 Z" />
+                    <path class="teeth" d="M61.6 85.4 C65.4 83.5 74.6 83.5 78.4 85.4 L77.5 88.8 L62.5 88.8 Z" />
+                    <ellipse class="gloss" cx="70" cy="93.2" rx="3.6" ry="1.3" />
                   </g>
                   <g class="m-smile">
-                    <path class="lip" d="M59.5 86 C63.2 82.4 66.8 84.6 70 84.6 C73.2 84.6 76.8 82.4 80.5 86
-                             C77.7 92 74 94.8 70 94.8 C66 94.8 62.3 92 59.5 86 Z" />
-                    <ellipse class="gloss" cx="70" cy="92" rx="4.2" ry="1.4" />
+                    <path class="lip up" d="M59.5 86.2 C63 83 66 82.6 67.4 84.2
+                             C68.6 85.6 71.4 85.6 72.6 84.2 C74 82.6 77 83 80.5 86.2
+                             C76.5 87.9 63.5 87.9 59.5 86.2 Z" />
+                    <path class="lip low" d="M59.5 86.2 C63.5 87.9 76.5 87.9 80.5 86.2
+                             C78.6 92.8 74.4 95.6 70 95.6 C65.6 95.6 61.4 92.8 59.5 86.2 Z" />
+                    <path class="lip-line" d="M59.5 86.2 C64 88.1 76 88.1 80.5 86.2" />
+                    <ellipse class="gloss" cx="70" cy="92.4" rx="4.4" ry="1.5" />
                   </g>
                   <g class="m-flat">
-                    <path class="lip" d="M62.5 87.4 C66.6 85.4 73.4 85.4 77.5 87.4 C75.2 90.2 64.8 90.2 62.5 87.4 Z" />
+                    <path class="lip up" d="M62 87 C65.4 85 74.6 85 78 87 C74.6 88 65.4 88 62 87 Z" />
+                    <path class="lip low" d="M62 87 C65.4 88 74.6 88 78 87 C76.2 90.4 63.8 90.4 62 87 Z" />
+                    <path class="lip-line" d="M62 87 C65.4 88.1 74.6 88.1 78 87" />
                   </g>
                   <g class="m-frown">
-                    <path class="lip" d="M61.5 92.2 C65.2 85.8 74.8 85.8 78.5 92.2
-                             C74.4 89.2 65.6 89.2 61.5 92.2 Z" />
+                    <path class="lip low" d="M61.5 93 C65.4 86.4 74.6 86.4 78.5 93
+                             C74.4 90 65.6 90 61.5 93 Z" />
+                    <path class="lip-line" d="M61.5 92.6 C65.6 89.4 74.4 89.4 78.5 92.6" />
                   </g>
                 </g>
 
-                <!-- ===== 前髪(センター分け+顔まわりレイヤー) ===== -->
-                <path class="hair bangs" d="M70 11
-                         C100 11 108 34 104 58 C103 48 100 40 95.5 35.5
-                         C88 43 79 46.5 70 46 C61 46.5 52 43 44.5 35.5
-                         C40 40 37 48 36 58 C32 34 40 11 70 11 Z" />
-                <path class="hair lock" d="M36.5 34 C29.5 46 27.5 64 30 86 L41 86
-                         C38 66 38 47 43.5 37.5 Z" />
-                <path class="hair lock" d="M103.5 34 C110.5 46 112.5 64 110 86 L99 86
-                         C102 66 102 47 96.5 37.5 Z" />
-                <!-- 前髪の毛流れ -->
-                <path class="strand light" d="M64 14 C56 20 50 27 47 35" />
-                <path class="strand light" d="M76 14 C84 20 90 27 93 35" />
-
                 <!-- 二重あご(ぽっちゃり時のみ) -->
-                <path class="chin-fold" d="M60 94 C64.5 99.5 75.5 99.5 80 94" />
+                <path class="chin-fold" d="M60 96 C64.5 101.5 75.5 101.5 80 96" />
+
+                <!-- ===== 前髪(センター分け+顔まわりレイヤー) ===== -->
+                <path class="hair bangs" d="M70 12
+                         C99 12 106 34 103 60 C102.5 50 100 41 96 35.5
+                         C88 44 79 47.5 70 47 C61 47.5 52 44 44 35.5
+                         C40 41 37.5 50 37 60 C34 34 41 12 70 12 Z" />
+                <path class="hair lock" d="M37.4 35 C30.5 47 28.6 66 31 88 L42 88
+                         C38.8 67 38.8 48 44.4 38.4 Z" />
+                <path class="hair lock" d="M102.6 35 C109.5 47 111.4 66 109 88 L98 88
+                         C101.2 67 101.2 48 95.6 38.4 Z" />
+                <!-- 頭頂の明るい面 -->
+                <path class="hair-hi" d="M70 12 C88 12 98 23 101 38
+                         C97 30 88 25.5 70 25.5 C52 25.5 43 30 39 38 C42 23 52 12 70 12 Z" />
+                <!-- ツヤ(髪の天使の輪) -->
+                <path class="hair-shine" d="M48 30 C56 22.5 84 22.5 92 30
+                         C90.5 35 89 39 88 43.5 C80 36.5 60 36.5 52 43.5
+                         C51 39 49.5 35 48 30 Z" />
+                <path class="strand light" d="M63 15 C55 21 49 28 46 36" />
+                <path class="strand light" d="M77 15 C85 21 91 28 94 36" />
+                <path class="strand dark" d="M69 14 C62 20 56 27 52 36" />
               </g>
 
               <!-- フープピアス(髪より前面) -->
@@ -251,8 +360,8 @@
 
               <!-- ティアラ(Lv10〜) -->
               <g class="tiara">
-                <path d="M55 19 L59.5 9 L65 16.5 L70 5.5 L75 16.5 L80.5 9 L85 19 Z" />
-                <circle cx="70" cy="11" r="2" />
+                <path d="M55 20 L59.5 10 L65 17.5 L70 5.5 L75 17.5 L80.5 10 L85 20 Z" />
+                <circle cx="70" cy="11.5" r="2" />
               </g>
 
               <!-- 状態エフェクト -->
@@ -270,22 +379,22 @@
           </div>
           <div class="exp-bar"><i id="expFill"></i></div>
           <div class="exp-label" id="expLabel">なかよし度 0 / 80</div>
-          <p class="avatar-msg" id="avatarMsg">記録するとギャルと仲良くなれるよ💅</p>
+          <p class="avatar-msg" id="avatarMsg">記録するとうちらもっと仲良くなれるよ💅</p>
         </div>
       </section>
 
       <!-- サマリー -->
       <section class="summary">
         <div class="stat">
-          <div class="label">直近7日平均</div>
+          <div class="label">7日のごはん平均</div>
           <div class="val" id="statAvg">–<small>kcal</small></div>
         </div>
         <div class="stat">
-          <div class="label">運動(7日)</div>
-          <div class="val" id="statExercise">–<small>回</small></div>
+          <div class="label">動いた日(7日)</div>
+          <div class="val" id="statExercise">–<small>日</small></div>
         </div>
         <div class="stat">
-          <div class="label">連続記録</div>
+          <div class="label">つづいてる</div>
           <div class="val" id="statStreak">–<small>日</small></div>
         </div>
       </section>
@@ -294,11 +403,11 @@
       <section class="quick-add">
         <button class="quick-btn" id="quickMealBtn">
           <span class="q-icon">🍽</span>
-          <span class="q-label">食事を記録</span>
+          <span class="q-label">ごはん入れる</span>
         </button>
         <button class="quick-btn" id="quickExBtn">
           <span class="q-icon">🏃</span>
-          <span class="q-label">運動を記録</span>
+          <span class="q-label">運動入れる</span>
         </button>
       </section>
 
@@ -314,46 +423,46 @@
         </div>
         <div class="grid" id="calGrid"></div>
         <div class="legend">
-          <span class="chip"><span class="sw sw-ok"></span>目標内</span>
-          <span class="chip"><span class="sw sw-over"></span>オーバー</span>
-          <span class="chip">🍽 食事 / 🏃 運動</span>
+          <span class="chip"><span class="sw sw-ok"></span>いい感じ</span>
+          <span class="chip"><span class="sw sw-over"></span>食べすぎ</span>
+          <span class="chip">🍽 ごはん / 🏃 運動</span>
         </div>
       </section>
     </main>
 
     <!-- ============ 日詳細画面 ============ -->
     <main class="screen" id="dayScreen" hidden>
-      <button class="back" id="backBtn">← カレンダーに戻る</button>
+      <button class="back" id="backBtn">← カレンダーもどる</button>
       <p class="detail-date" id="detailDate"></p>
       <p class="detail-sub" id="detailSub"></p>
 
       <section class="card">
         <div class="card-head">
-          <h3>食事の記録</h3>
-          <button class="mini-btn" id="addMealBtn">＋ 追加</button>
+          <h3>この日のごはん🍽</h3>
+          <button class="mini-btn" id="addMealBtn">＋ 入れる</button>
         </div>
         <div id="mealList" class="record-list"></div>
       </section>
 
       <section class="card">
         <div class="card-head">
-          <h3>運動の記録</h3>
-          <button class="mini-btn" id="addExBtn">＋ 追加</button>
+          <h3>この日の運動🏃</h3>
+          <button class="mini-btn" id="addExBtn">＋ 入れる</button>
         </div>
         <div id="exList" class="record-list"></div>
       </section>
 
       <section class="card advice">
         <div class="card-head">
-          <h3>ギャルの判定</h3>
+          <h3>ギャルのジャッジ💅</h3>
           <div class="score" id="scoreBadge" hidden>
             <b id="scoreVal">–</b><small>点</small>
           </div>
         </div>
         <p class="advice-headline" id="adviceHeadline" hidden></p>
-        <p class="advice-text" id="adviceText">まだ判定してもらってないよ〜</p>
-        <button class="btn" id="genBtn">💖 ギャルに判定してもらう</button>
-        <button class="btn ghost" id="pasteAdviceBtn">コメントを貼り付けて保存</button>
+        <p class="advice-text" id="adviceText">まだ見てないよ〜、押してみて?</p>
+        <button class="btn" id="genBtn">💖 ギャルに見てもらう</button>
+        <button class="btn ghost" id="pasteAdviceBtn">もらったコメントを貼る</button>
       </section>
     </main>
 
@@ -361,11 +470,11 @@
 
   <!-- ============ 食事入力シート ============ -->
   <div class="overlay" id="mealOverlay">
-    <div class="sheet" role="dialog" aria-label="食事を記録">
-      <h2 id="mealSheetTitle">食事を記録</h2>
+    <div class="sheet" role="dialog" aria-label="ごはんを入れる">
+      <h2 id="mealSheetTitle">ごはん入れよ〜🍽</h2>
       <form id="mealForm">
         <label class="field">
-          <span>いつ</span>
+          <span>いつのごはん?</span>
           <select id="mealSlot">
             <option value="朝食">朝食</option>
             <option value="昼食">昼食</option>
@@ -374,22 +483,22 @@
           </select>
         </label>
         <label class="field">
-          <span>食べたもの</span>
+          <span>なに食べた?</span>
           <input type="text" id="mealItems" placeholder="例:味噌ラーメン・餃子3個" required maxlength="100" />
         </label>
         <label class="field">
-          <span>写真(任意)</span>
+          <span>写真あったらちょうだい(任意)</span>
           <input type="file" id="mealPhoto" accept="image/*" />
         </label>
         <div class="photo-preview" id="photoPreview" hidden>
           <img id="photoPreviewImg" alt="写真プレビュー" />
         </div>
 
-        <button type="button" class="btn estimate" id="estimateBtn">✨ AIでカロリー・PFCを推定</button>
-        <p class="estimate-hint" id="estimateHint" hidden>接続設定をすると使えます(⚙️から設定)</p>
+        <button type="button" class="btn estimate" id="estimateBtn">✨ AIにカロリー・PFC出してもらう</button>
+        <p class="estimate-hint" id="estimateHint" hidden>⚙️でAIつなぐと使えるよ〜</p>
 
         <label class="field">
-          <span>カロリー(だいたいでOK)</span>
+          <span>カロリー(てきとうでOK)</span>
           <input type="number" id="mealKcal" placeholder="800" min="0" max="5000" inputmode="numeric" />
         </label>
         <div class="pfc-inputs">
@@ -408,9 +517,9 @@
         </div>
 
         <div class="sheet-actions">
-          <button type="submit" class="btn">保存する</button>
-          <button type="button" class="btn ghost" data-close>キャンセル</button>
-          <button type="button" class="btn danger" id="deleteMealBtn" hidden>この記録を削除</button>
+          <button type="submit" class="btn">これで保存💾</button>
+          <button type="button" class="btn ghost" data-close>やっぱやめる</button>
+          <button type="button" class="btn danger" id="deleteMealBtn" hidden>これ消す🗑</button>
         </div>
       </form>
     </div>
@@ -418,15 +527,15 @@
 
   <!-- ============ 運動入力シート ============ -->
   <div class="overlay" id="exOverlay">
-    <div class="sheet" role="dialog" aria-label="運動を記録">
-      <h2 id="exSheetTitle">運動を記録</h2>
+    <div class="sheet" role="dialog" aria-label="運動を入れる">
+      <h2 id="exSheetTitle">運動入れよ〜🏃</h2>
       <form id="exForm">
         <label class="field">
-          <span>内容</span>
+          <span>なにした?</span>
           <input type="text" id="exName" placeholder="例:ランニング 5km / ジム上半身" required maxlength="60" />
         </label>
         <label class="field">
-          <span>時間(分)</span>
+          <span>何分やった?</span>
           <input type="number" id="exMinutes" placeholder="30" min="0" max="600" inputmode="numeric" />
         </label>
         <label class="field">
@@ -434,9 +543,9 @@
           <input type="number" id="exKcal" placeholder="300" min="0" max="3000" inputmode="numeric" />
         </label>
         <div class="sheet-actions">
-          <button type="submit" class="btn">保存する</button>
-          <button type="button" class="btn ghost" data-close>キャンセル</button>
-          <button type="button" class="btn danger" id="deleteExBtn" hidden>この記録を削除</button>
+          <button type="submit" class="btn">これで保存💾</button>
+          <button type="button" class="btn ghost" data-close>やっぱやめる</button>
+          <button type="button" class="btn danger" id="deleteExBtn" hidden>これ消す🗑</button>
         </div>
       </form>
     </div>
@@ -445,25 +554,25 @@
   <!-- ============ プロンプトシート ============ -->
   <div class="overlay" id="promptOverlay">
     <div class="sheet" role="dialog" aria-label="プロンプト生成">
-      <h2>プロンプトを生成しました</h2>
-      <p class="hint">コピーしてClaude(いつものプロジェクト)に貼り付けてください。返ってきたアドバイスは「貼り付けて保存」で記録できます。</p>
+      <h2>プロンプトできたよ📝</h2>
+      <p class="hint">これコピってClaudeに貼ってみて〜。返ってきたコメントは「もらったコメントを貼る」から保存できるよ💾</p>
       <div class="prompt-box" id="promptBox"></div>
       <div class="sheet-actions">
-        <button class="btn" id="copyPromptBtn">プロンプトをコピー</button>
-        <button class="btn ghost" data-close>閉じる</button>
+        <button class="btn" id="copyPromptBtn">コピるっ📋</button>
+        <button class="btn ghost" data-close>とじる</button>
       </div>
     </div>
   </div>
 
   <!-- ============ アドバイス貼り付けシート ============ -->
   <div class="overlay" id="adviceOverlay">
-    <div class="sheet" role="dialog" aria-label="アドバイスを保存">
-      <h2>Claudeの回答を保存</h2>
-      <p class="hint">Claudeから返ってきたアドバイスをここに貼り付けると、この日の記録として残ります。</p>
-      <textarea id="adviceInput" rows="6" placeholder="ここに貼り付け"></textarea>
+    <div class="sheet" role="dialog" aria-label="コメントを保存">
+      <h2>もらったコメント貼って💌</h2>
+      <p class="hint">Claudeから返ってきた文をここに貼ると、この日の記録として残るよ〜。「85点」みたいな点数も勝手に拾うから安心して🙆‍♀️</p>
+      <textarea id="adviceInput" rows="6" placeholder="ここに貼りつけ"></textarea>
       <div class="sheet-actions">
-        <button class="btn" id="saveAdviceBtn">保存する</button>
-        <button class="btn ghost" data-close>キャンセル</button>
+        <button class="btn" id="saveAdviceBtn">これで保存💾</button>
+        <button class="btn ghost" data-close>やっぱやめる</button>
       </div>
     </div>
   </div>
@@ -471,16 +580,28 @@
   <!-- ============ 設定シート ============ -->
   <div class="overlay" id="settingsOverlay">
     <div class="sheet" role="dialog" aria-label="設定">
-      <h2>設定</h2>
+      <h2>設定いじる⚙️</h2>
       <form id="settingsForm">
         <label class="field">
           <span>1日の目標カロリー</span>
           <input type="number" id="goalInput" min="800" max="5000" inputmode="numeric" required />
         </label>
 
+        <label class="field">
+          <span>なんて呼ばれたい?(例:ひろくん / そうちゃん)</span>
+          <input type="text" id="nickInput" placeholder="ひろくん" maxlength="12" autocomplete="off" />
+        </label>
+
         <div class="settings-section">
-          <h3>AI連携(任意)</h3>
-          <p class="hint">中継サーバーを立てると、写真・テキストからのカロリー/PFC自動推定とアプリ内アドバイスが使えます。未設定でもコピペ方式で使えます。</p>
+          <h3>ギャルのタイプ💅</h3>
+          <p class="hint">好みで選んでね〜。見た目もしゃべり方も変わるよ✨</p>
+          <div class="type-picker" id="typePicker"></div>
+          <p class="type-catch" id="typeCatch"></p>
+        </div>
+
+        <div class="settings-section">
+          <h3>AIつなぐ(任意)</h3>
+          <p class="hint">中継サーバー立てると、写真やテキストからカロリー/PFC自動で出して、アプリの中でジャッジまでできるよ〜。未設定でもコピペでいけるから安心して🙆‍♀️</p>
           <label class="field">
             <span>中継サーバーのURL</span>
             <input type="url" id="backendUrl" placeholder="https://xxxx.workers.dev" inputmode="url" />
@@ -489,13 +610,13 @@
             <span>アクセストークン</span>
             <input type="text" id="backendToken" placeholder="自分で決めた合言葉" autocomplete="off" />
           </label>
-          <button type="button" class="btn ghost" id="testBackendBtn">接続テスト</button>
+          <button type="button" class="btn ghost" id="testBackendBtn">つながるか試す</button>
           <p class="accuracy-note" id="accuracyNote" hidden></p>
         </div>
 
         <div class="sheet-actions">
-          <button type="submit" class="btn">保存する</button>
-          <button type="button" class="btn ghost" data-close>キャンセル</button>
+          <button type="submit" class="btn">これで保存💾</button>
+          <button type="button" class="btn ghost" data-close>やっぱやめる</button>
         </div>
       </form>
     </div>
