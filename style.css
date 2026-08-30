@@ -121,51 +121,75 @@ body {
   50% { transform: translateY(-2.5px); }
 }
 
-/* ---- 基本の塗り ---- */
+/* ---- 髪 ---- */
 .gal .hair { fill: url(#hairBlonde); }
+/* 毛流れ:白/黒の半透明なので、髪の色が変わってもそのまま馴染む */
+.gal .strand { fill: none; stroke-linecap: round; }
+.gal .strand.light { stroke: #fff; stroke-width: 2.2; opacity: .3; }
+.gal .strand.dark { stroke: #8a5c1f; stroke-width: 1.8; opacity: .22; }
+/* インナーカラー */
+.gal .streak.pink { fill: #ff86c6; opacity: .75; }
+.gal .streak.blue { fill: #7fd0ef; opacity: .7; }
+
+/* ---- 肌 ---- */
 .gal .face,
 .gal .neck,
 .gal .ear { fill: url(#skinG); }
-.gal .neck-shadow { fill: #d99b70; opacity: .55; }
-.gal .ear { stroke: #dda67d; stroke-width: .8; }
+.gal .neck-shadow { fill: #c6845a; opacity: .5; }
+.gal .ear { stroke: #cf9163; stroke-width: .8; }
 .gal .top { fill: url(#topG); }
-.gal .top-neckline { fill: #f6c49f; }
+.gal .top-neckline { fill: #eab388; }
+.gal .chain {
+  fill: none; stroke: var(--gold);
+  stroke-width: 1.2; opacity: .95;
+}
+.gal .pendant { fill: var(--gold); }
 
+/* ---- 目もと(盛りメイク) ---- */
+.gal .lid-shadow { fill: url(#lidG); }
 .gal .sclera { fill: #fffdfa; }
 .gal .iris { fill: url(#irisG); }
-.gal .pupil { fill: #23130c; }
+.gal .limbal { fill: none; stroke: #2e1a0c; stroke-width: 1.5; opacity: .8; }
+.gal .pupil { fill: #1c0f07; }
 .gal .glint { fill: #fff; opacity: .95; }
-.gal .glint.sm { opacity: .7; }
+.gal .glint.sm { opacity: .75; }
 .gal .liner {
-  fill: none; stroke: #3a2028;
-  stroke-width: 3.2; stroke-linecap: round;
+  fill: none; stroke: #2c1820;
+  stroke-width: 3.4; stroke-linecap: round;
 }
+.gal .wing { fill: #2c1820; }
 .gal .lash {
-  fill: none; stroke: #3a2028;
-  stroke-width: 2.2; stroke-linecap: round;
+  fill: none; stroke: #2c1820;
+  stroke-width: 1.9; stroke-linecap: round;
 }
-.gal .underline {
-  fill: none; stroke: #8a5560;
-  stroke-width: 1.3; stroke-linecap: round; opacity: .75;
+.gal .lash.sm { stroke-width: 1.2; opacity: .8; }
+/* 涙袋(強すぎると隈に見えるので控えめに) */
+.gal .tear-bag { fill: #fff4e6; opacity: .5; }
+.gal .tear-line {
+  fill: none; stroke: #cf9a76;
+  stroke-width: .9; stroke-linecap: round; opacity: .35;
 }
 .gal .happy-eye {
-  fill: none; stroke: #3a2028;
-  stroke-width: 3.2; stroke-linecap: round;
+  fill: none; stroke: #2c1820;
+  stroke-width: 3.4; stroke-linecap: round;
 }
 .gal .brow {
-  fill: none; stroke: #a9743c;
-  stroke-width: 3; stroke-linecap: round;
+  fill: none; stroke: #9c6a33;
+  stroke-width: 3.2; stroke-linecap: round;
 }
-.gal .nose {
-  fill: none; stroke: #d79a72;
-  stroke-width: 1.6; stroke-linecap: round;
+
+/* ---- 鼻・口 ---- */
+.gal .nose-shade {
+  fill: none; stroke: #cf9163;
+  stroke-width: 1.4; stroke-linecap: round; opacity: .55;
 }
-.gal .lip { fill: #d94f78; }
+.gal .lip { fill: #d4536f; }
 .gal .teeth { fill: #fffaf8; }
-.gal .blush { fill: #ff7fa8; opacity: .38; }
+.gal .gloss { fill: #fff; opacity: .45; }
+.gal .blush { fill: #ff7a9e; opacity: .34; }
 .gal .earrings circle {
   fill: none; stroke: var(--gold);
-  stroke-width: 2;
+  stroke-width: 2.2;
 }
 
 /* ---- 出し分け(初期状態) ---- */
