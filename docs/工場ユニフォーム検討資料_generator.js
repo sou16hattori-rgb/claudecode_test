@@ -89,9 +89,9 @@ function numberBadge(slide, x, y, label, color) {
   titleBar(s, "SUMMARY", "調査サマリ（結論）");
 
   const stats = [
-    { v: "¥4,000〜18,000", l: "ジャケット1着あたり\n（既製品＋名入れ〜フルオーダー）", c: NAVY },
-    { v: "¥150〜650", l: "ストラップ1本あたり\n（本数・印刷方式で変動）", c: "2E5A8C" },
-    { v: "2週間〜5ヶ月", l: "納期の幅\n（既製品加工〜フルオーダー量産）", c: AMBER_D },
+    { v: "¥3,600〜18,000", l: "ジャケット1着あたり\n（既製品＋刺繍〜フルオーダー）", c: NAVY },
+    { v: "¥137〜244", l: "ストラップ1本あたり\n（HOTSTRAP公表単価・税込）", c: "2E5A8C" },
+    { v: "2週間〜8ヶ月", l: "納期の幅\n（既製品加工〜フルオーダー量産）", c: AMBER_D },
   ];
   stats.forEach((st, i) => {
     const x = 0.6 + i * 4.12;
@@ -110,9 +110,9 @@ function numberBadge(slide, x, y, label, color) {
   });
 
   const points = [
-    ["価格差は「どこまでオリジナルにするか」でほぼ決まる", "フルオーダー（型から起こす）は1着15,000〜18,000円、既製品への社名刺繍なら1着4,000〜6,000円台。"],
-    ["ネックストラップは現行品と同じフルカラー昇華転写が現実的", "現行ストラップはフルカラー昇華。同等品は50〜100本で1本250〜650円程度、版代不要の業者が多い。"],
-    ["最大のリスクは納期。フルオーダーは着用希望日から逆算が必須", "フルオーダーは2〜5ヶ月。今冬から着用するならフルオーダーは実質間に合わない可能性が高い。"],
+    ["価格差は「どこまでオリジナルにするか」でほぼ決まる", "フルオーダーは1着15,000〜18,000円（KIRUMIRAI調査）。既製ブルゾン3,000〜4,000円台＋社名刺繍220〜660円なら1着4,000円前後から。"],
+    ["ネックストラップはフルカラー昇華が1本から発注できる", "HOTSTRAPはフルカラー昇華232円〜／シルク137円〜（税込）、1本から。KANARY・青山ストラップは30本〜。"],
+    ["納期はフルオーダーが最大の制約。平均4〜5ヶ月、海外縫製なら6〜8ヶ月", "国内生産で3〜4ヶ月、色にこだわり染色工程が入るとさらに+2ヶ月。既製品＋刺繍なら約2週間。"],
   ];
   points.forEach((p, i) => {
     const y = 3.75 + i * 1.06;
@@ -126,7 +126,7 @@ function numberBadge(slide, x, y, label, color) {
       fontFace: JP, fontSize: 12, color: SLATE, lineSpacing: 17,
     });
   });
-  s.addNotes("金額はいずれも各社公開情報および業界相場からの目安。正式には見積依頼が必要。");
+  s.addNotes("数値の出典と確度は「数値の出典と確度」ページを参照。公表されていない項目は要見積。");
 }
 
 // ---------- 3. Premises ----------
@@ -196,13 +196,13 @@ function numberBadge(slide, x, y, label, color) {
       name: "日本被服工業",
       site: "nihonhifuku.jp",
       color: NAVY,
-      lot: "50セット〜",
-      price: "15,000〜18,000円/着",
-      lead: "約2〜3ヶ月",
+      lot: "要問合せ（相場は国内100着〜）",
+      price: "15,000〜18,000円/着（相場）",
+      lead: "要問合せ（相場4〜5ヶ月）",
       bullets: [
         "デザイン・素材選定からサンプル、サイズ合わせ、量産まで一貫対応",
         "刺繍・プリント・ワッペンなど加工の選択肢が広い",
-        "完全オリジナルで他社と被らない／ブランディング効果が最も高い",
+        "ロット・納期・価格は自社サイトに明示がなく、見積で確定させる必要あり",
       ],
     },
     {
@@ -210,177 +210,27 @@ function numberBadge(slide, x, y, label, color) {
       name: "ユニフォームネット（Bechule）",
       site: "uniform-net.jp",
       color: "2E5A8C",
-      lot: "20人分〜",
-      price: "10,000〜20,000円/着",
-      lead: "約3〜5ヶ月",
+      lot: "20着〜（サイトに明記）",
+      price: "公表なし（要見積）",
+      lead: "国内3〜4ヶ月／海外6〜8ヶ月",
       bullets: [
         "ヒアリング→デザインイラスト作成→サンプル制作まで対応",
-        "小ロット専用のパターンオーダー枠があり少人数でも実現可能",
-        "型は既存パターンを流用しコストと失敗リスクを抑えられる",
+        "小ロット専用パターンオーダーの最小ロットをサイトで明示している",
+        "納期は生産地で大きく変わる。サンプルのやり直しを含めると約1年の記載も",
       ],
     },
     {
       tag: "候補③ 既製品＋名入れ（一般サイト）",
-      name: "ユニフォームネクスト／ワークストリート 他",
+      name: "ユニフォームネクスト／ワークキング 他",
       site: "uniformnext.com ほか",
       color: AMBER,
       lot: "1着〜",
-      price: "4,000〜8,000円/着",
-      lead: "約2週間",
+      price: "本体3,000〜8,000円＋刺繍220〜660円",
+      lead: "約2週間（在庫品）",
       bullets: [
         "既製ブルゾンに社名刺繍・プリントを1着から加工",
-        "刺繍代は1着220〜660円程度（ロゴサイズ・色数で変動）",
+        "低価格帯ブルゾンは3,000〜4,000円台、上下で7,000〜8,000円（2025年秋時点）",
         "現物確認ができ、追加発注・サイズ交換も容易",
-      ],
-    },
-  ];
-
-  cards.forEach((c, i) => {
-    const x = 0.6 + i * 4.12;
-    s.addShape(pres.ShapeType.roundRect, {
-      x, y: 1.62, w: 3.85, h: 5.0, rectRadius: 0.08,
-      fill: { color: WHITE }, line: { color: "DDE3F0", width: 1 }, shadow: shadow(),
-    });
-    s.addShape(pres.ShapeType.roundRect, {
-      x: x + 0.25, y: 1.85, w: 3.35, h: 0.34, rectRadius: 0.17,
-      fill: { color: c.color }, line: { width: 0 },
-    });
-    s.addText(c.tag, {
-      x: x + 0.25, y: 1.85, w: 3.35, h: 0.34, isTextBox: true, margin: 0,
-      fontFace: JP, fontSize: 10, bold: true, color: WHITE, align: "center", valign: "middle",
-    });
-    s.addText(c.name, {
-      x: x + 0.25, y: 2.32, w: 3.35, h: 0.6, isTextBox: true, margin: 0,
-      fontFace: JP, fontSize: 15, bold: true, color: INK, lineSpacing: 20,
-    });
-    s.addText(c.site, {
-      x: x + 0.25, y: 2.94, w: 3.35, h: 0.25, isTextBox: true, margin: 0,
-      fontFace: "Arial", fontSize: 10, color: SLATE,
-    });
-
-    const specs = [["最小ロット", c.lot], ["単価目安", c.price], ["納期目安", c.lead]];
-    specs.forEach((sp, j) => {
-      const y = 3.3 + j * 0.5;
-      s.addText(sp[0], {
-        x: x + 0.25, y, w: 1.15, h: 0.35, isTextBox: true, margin: 0,
-        fontFace: JP, fontSize: 10.5, color: SLATE, valign: "middle",
-      });
-      s.addText(sp[1], {
-        x: x + 1.4, y, w: 2.2, h: 0.35, isTextBox: true, margin: 0,
-        fontFace: JP, fontSize: 12, bold: true, color: c.color, valign: "middle",
-      });
-    });
-
-    s.addText(c.bullets.map((b, k) => ({
-      text: b, options: { bullet: true, breakLine: k !== c.bullets.length - 1 },
-    })), {
-      x: x + 0.25, y: 4.95, w: 3.35, h: 1.5, isTextBox: true, margin: 0,
-      fontFace: JP, fontSize: 10.5, color: INK, lineSpacing: 15, paraSpaceAfter: 6,
-    });
-  });
-  s.addNotes("候補①②は後輩の一次調査から。候補③は「一般サイトで発注した場合」の比較軸として追加。");
-}
-
-// ---------- 5. Jacket comparison table ----------
-{
-  const s = pres.addSlide();
-  titleBar(s, "JACKET / 比較", "ジャケット3案の比較と向き・不向き");
-
-  const head = ["", "① 日本被服工業\nフルオーダー", "② ユニフォームネット\n小ロットオーダー", "③ 一般サイト\n既製品＋名入れ"];
-  const rows = [
-    ["最小ロット", "50セット〜", "20人分〜", "1着〜"],
-    ["単価目安", "15,000〜18,000円", "10,000〜20,000円", "4,000〜8,000円\n（＋刺繍220〜660円）"],
-    ["納期目安", "2〜3ヶ月", "3〜5ヶ月", "2週間前後"],
-    ["デザイン自由度", "◎ 型・素材から設計", "○ 既存型をベースに調整", "△ 既製デザイン＋ロゴのみ"],
-    ["初期費用", "型代・サンプル代が発生", "サンプル代が発生", "ほぼ不要"],
-    ["向くケース", "全社刷新・長期運用", "少人数でも独自性を出したい", "早く・安く始めたい"],
-  ];
-
-  const tblRows = [
-    head.map((h, i) => ({
-      text: h,
-      options: {
-        fill: i === 0 ? NAVY_D : NAVY, color: WHITE, bold: true, fontSize: 11.5,
-        fontFace: JP, align: "center", valign: "middle",
-      },
-    })),
-    ...rows.map((r, ri) => r.map((cell, ci) => ({
-      text: cell,
-      options: {
-        fill: ci === 0 ? "E9EDF7" : (ri % 2 === 0 ? WHITE : "F8FAFE"),
-        color: ci === 0 ? NAVY : INK,
-        bold: ci === 0,
-        fontSize: 11,
-        fontFace: JP,
-        align: ci === 0 ? "left" : "center",
-        valign: "middle",
-      },
-    }))),
-  ];
-
-  s.addTable(tblRows, {
-    x: 0.6, y: 1.65, w: 12.1, colW: [2.2, 3.3, 3.3, 3.3],
-    rowH: [0.62, 0.5, 0.62, 0.5, 0.5, 0.5, 0.5],
-    border: { type: "solid", color: "D6DDEE", pt: 1 },
-    margin: 6,
-  });
-
-  s.addShape(pres.ShapeType.roundRect, {
-    x: 0.6, y: 5.95, w: 12.1, h: 0.95, rectRadius: 0.08,
-    fill: { color: "FDF4E4" }, line: { color: "F0DCB8", width: 1 },
-  });
-  s.addText("読み取り：30名規模なら①②はロット条件をクリアできるが、納期が2〜5ヶ月かかる。今期中の着用が必要なら③でスタートし、次期に①②へ移行する二段構えが現実的。", {
-    x: 0.95, y: 5.95, w: 11.4, h: 0.95, isTextBox: true, margin: 0,
-    fontFace: JP, fontSize: 12.5, color: "8A5A12", valign: "middle", lineSpacing: 19,
-  });
-}
-
-// ---------- 6. Strap candidates ----------
-{
-  const s = pres.addSlide();
-  titleBar(s, "STRAP / 候補①〜③", "ネックストラップ候補3案");
-
-  const cards = [
-    {
-      tag: "候補① 法人・伴走型",
-      name: "キラメック（KILAMEK）",
-      site: "kilamek-novelty.com",
-      color: NAVY,
-      lot: "小ロット5個〜／50本パッケージ",
-      price: "要見積（1色プリント品あり）",
-      lead: "要確認（納期交渉可）",
-      bullets: [
-        "BtoB専門。専任担当と相談しながら素材・印刷・パーツを選定",
-        "完成データが手元になくてもデザイン面を相談できる点が他社との差",
-        "同社は作業服・刺繍加工も扱うため、ジャケットと窓口をまとめられる",
-      ],
-    },
-    {
-      tag: "候補② スピード・自動見積",
-      name: "HOTSTRAP（ホットストラップ）",
-      site: "hotstrap.jp",
-      color: "2E5A8C",
-      lot: "1本〜",
-      price: "シルク100本で244円/本〜\nフルカラー昇華も対応",
-      lead: "通常6〜9営業日／最短3〜4営業日",
-      bullets: [
-        "Web上の自動見積で本数・仕様別の金額をその場で確認できる",
-        "ナイロン10/15/20mm、合皮、プレミアムなど素材の選択肢が広い",
-        "50本以上は無料で試作1本を確認できる案内あり",
-      ],
-    },
-    {
-      tag: "候補③ 昇華転写に強い専門店",
-      name: "KANARY／青山ストラップ 他",
-      site: "kanary.jp／ao-strap.com",
-      color: AMBER,
-      lot: "100本〜が中心",
-      price: "昇華100本で650円/本前後\n大ロットは150円台〜",
-      lead: "サンプル約1週間＋量産約3週間",
-      bullets: [
-        "昇華転写のため製版不要＝版代がかからない業者が多い",
-        "グラデーション・写真・多色デザインを再現しやすい",
-        "本数が増えるほど単価が下がるため、まとめ発注向き",
       ],
     },
   ];
@@ -425,6 +275,156 @@ function numberBadge(slide, x, y, label, color) {
       text: b, options: { bullet: true, breakLine: k !== c.bullets.length - 1 },
     })), {
       x: x + 0.25, y: 5.05, w: 3.35, h: 1.4, isTextBox: true, margin: 0,
+      fontFace: JP, fontSize: 10.5, color: INK, lineSpacing: 15, paraSpaceAfter: 6,
+    });
+  });
+  s.addNotes("①の50セット・2〜3ヶ月という数値は一次調査のメモにあったもので、公開サイト上では確認できていない。見積で確定させる。");
+}
+
+// ---------- 5. Jacket comparison table ----------
+{
+  const s = pres.addSlide();
+  titleBar(s, "JACKET / 比較", "ジャケット3案の比較（数値の出所つき）");
+
+  const head = ["", "① 日本被服工業\nフルオーダー", "② ユニフォームネット\n小ロットオーダー", "③ 一般サイト\n既製品＋名入れ"];
+  const rows = [
+    ["最小ロット", "要問合せ\n（相場：国内100着〜）", "20着〜\n（サイトに明記）", "1着〜\n（サイトに明記）"],
+    ["単価目安", "15,000〜18,000円\n（第三者調査の相場）", "公表なし\n（要見積）", "本体3,000〜8,000円\n＋刺繍220〜660円"],
+    ["納期目安", "要問合せ\n（相場：4〜5ヶ月）", "国内3〜4ヶ月\n海外6〜8ヶ月", "約2週間\n（在庫品）"],
+    ["デザイン自由度", "◎ 型・素材から設計", "○ 既存型をベースに調整", "△ 既製デザイン＋ロゴのみ"],
+    ["初期費用", "型代・サンプル代が発生", "サンプル代が発生", "ほぼ不要"],
+    ["向くケース", "全社刷新・長期運用", "少人数でも独自性を出したい", "早く・安く始めたい"],
+  ];
+
+  const tblRows = [
+    head.map((h, i) => ({
+      text: h,
+      options: {
+        fill: i === 0 ? NAVY_D : NAVY, color: WHITE, bold: true, fontSize: 11.5,
+        fontFace: JP, align: "center", valign: "middle",
+      },
+    })),
+    ...rows.map((r, ri) => r.map((cell, ci) => ({
+      text: cell,
+      options: {
+        fill: ci === 0 ? "E9EDF7" : (ri % 2 === 0 ? WHITE : "F8FAFE"),
+        color: ci === 0 ? NAVY : INK,
+        bold: ci === 0,
+        fontSize: 10.5,
+        fontFace: JP,
+        align: ci === 0 ? "left" : "center",
+        valign: "middle",
+      },
+    }))),
+  ];
+
+  s.addTable(tblRows, {
+    x: 0.6, y: 1.62, w: 12.1, colW: [2.2, 3.3, 3.3, 3.3],
+    rowH: [0.6, 0.62, 0.62, 0.62, 0.42, 0.42, 0.42],
+    border: { type: "solid", color: "D6DDEE", pt: 1 },
+    margin: 6,
+  });
+
+  s.addShape(pres.ShapeType.roundRect, {
+    x: 0.6, y: 5.85, w: 12.1, h: 1.05, rectRadius: 0.08,
+    fill: { color: "FDF4E4" }, line: { color: "F0DCB8", width: 1 },
+  });
+  s.addText("読み取り：サイトに数値が明記されているのは②の「20着〜」と③のみ。①は価格・ロット・納期とも非公開のため見積が必須。今期中の着用が必要なら③で先行し、次期に①②を検討する二段構えが現実的。", {
+    x: 0.95, y: 5.85, w: 11.4, h: 1.05, isTextBox: true, margin: 0,
+    fontFace: JP, fontSize: 12, color: "8A5A12", valign: "middle", lineSpacing: 19,
+  });
+}
+
+// ---------- 6. Strap candidates ----------
+{
+  const s = pres.addSlide();
+  titleBar(s, "STRAP / 候補①〜③", "ネックストラップ候補3案");
+
+  const cards = [
+    {
+      tag: "候補① 法人・伴走型",
+      name: "キラメック（KILAMEK）",
+      site: "kilamek-novelty.com",
+      color: NAVY,
+      lot: "サイト全体で5個〜\n（ストラップ個別は要確認）",
+      price: "公表なし（要見積）",
+      lead: "公表なし（納期交渉可の記載）",
+      bullets: [
+        "BtoB専門。専任担当と相談しながら素材・印刷・パーツを選定",
+        "完成データが手元になくてもデザイン面を相談できる点が他社との差",
+        "同社は作業服・刺繍加工も扱うため、ジャケットと窓口をまとめられる",
+      ],
+    },
+    {
+      tag: "候補② スピード・自動見積",
+      name: "HOTSTRAP（ホットストラップ）",
+      site: "hotstrap.jp",
+      color: "2E5A8C",
+      lot: "1本〜",
+      price: "昇華フルカラー232円〜／シルク137円〜（税込）\n10mmナイロン100本＝244円/本",
+      lead: "通常6〜9営業日／特急4〜5営業日",
+      bullets: [
+        "Web上の自動見積で本数・仕様別の金額とPDF見積書をその場で取得できる",
+        "ナイロン10/15/20mm、ポリエステル、合皮、プレミアムなど選択肢が広い",
+        "3案の中で唯一、単価・納期がサイト上で数値として確認できる",
+      ],
+    },
+    {
+      tag: "候補③ 昇華転写に強い専門店",
+      name: "KANARY／青山ストラップ",
+      site: "kanary.jp／ao-strap.com",
+      color: AMBER,
+      lot: "KANARY：昇華は30本〜\n青山：30〜5,000本の枠",
+      price: "青山：大ロットで100円〜\nKANARY：サイトに価格表あり（金具別）",
+      lead: "青山：量産開始から14日目出荷",
+      bullets: [
+        "昇華転写のため製版不要＝版代がかからない",
+        "グラデーション・写真・多色デザインを再現しやすい",
+        "本数が増えるほど単価が下がるため、まとめ発注向き",
+      ],
+    },
+  ];
+
+  cards.forEach((c, i) => {
+    const x = 0.6 + i * 4.12;
+    s.addShape(pres.ShapeType.roundRect, {
+      x, y: 1.62, w: 3.85, h: 5.0, rectRadius: 0.08,
+      fill: { color: WHITE }, line: { color: "DDE3F0", width: 1 }, shadow: shadow(),
+    });
+    s.addShape(pres.ShapeType.roundRect, {
+      x: x + 0.25, y: 1.85, w: 3.35, h: 0.34, rectRadius: 0.17,
+      fill: { color: c.color }, line: { width: 0 },
+    });
+    s.addText(c.tag, {
+      x: x + 0.25, y: 1.85, w: 3.35, h: 0.34, isTextBox: true, margin: 0,
+      fontFace: JP, fontSize: 10, bold: true, color: WHITE, align: "center", valign: "middle",
+    });
+    s.addText(c.name, {
+      x: x + 0.25, y: 2.32, w: 3.35, h: 0.6, isTextBox: true, margin: 0,
+      fontFace: JP, fontSize: 15, bold: true, color: INK, lineSpacing: 20,
+    });
+    s.addText(c.site, {
+      x: x + 0.25, y: 2.94, w: 3.35, h: 0.25, isTextBox: true, margin: 0,
+      fontFace: "Arial", fontSize: 10, color: SLATE,
+    });
+
+    const specs = [["最小ロット", c.lot], ["単価目安", c.price], ["納期目安", c.lead]];
+    specs.forEach((sp, j) => {
+      const y = 3.28 + j * 0.6;
+      s.addText(sp[0], {
+        x: x + 0.25, y, w: 1.15, h: 0.5, isTextBox: true, margin: 0,
+        fontFace: JP, fontSize: 10.5, color: SLATE, valign: "middle",
+      });
+      s.addText(sp[1], {
+        x: x + 1.4, y, w: 2.2, h: 0.5, isTextBox: true, margin: 0,
+        fontFace: JP, fontSize: 9.5, bold: true, color: c.color, valign: "middle", lineSpacing: 13,
+      });
+    });
+
+    s.addText(c.bullets.map((b, k) => ({
+      text: b, options: { bullet: true, breakLine: k !== c.bullets.length - 1 },
+    })), {
+      x: x + 0.25, y: 5.15, w: 3.35, h: 1.35, isTextBox: true, margin: 0,
       fontFace: JP, fontSize: 10.5, color: INK, lineSpacing: 15, paraSpaceAfter: 6,
     });
   });
@@ -556,26 +556,34 @@ function numberBadge(slide, x, y, label, color) {
 
   s.addChart(pres.ChartType.bar, [
     {
-      name: "30名分の概算費用（万円）",
+      name: "下限（万円）",
       labels: ["③ 既製品＋名入れ", "② 小ロットオーダー", "① フルオーダー"],
-      values: [18.1, 31.8, 47.5],
+      values: [11.9, 31.2, 46.2],
+    },
+    {
+      name: "上限（万円）",
+      labels: ["③ 既製品＋名入れ", "② 小ロットオーダー", "① フルオーダー"],
+      values: [26.9, 46.2, 55.2],
     },
   ], {
     x: 0.6, y: 1.7, w: 7.0, h: 4.9,
     barDir: "bar",
-    chartColors: [NAVY],
+    chartColors: [NAVY, "8E9CC4"],
     showTitle: true,
-    title: "パターン別の概算総額（万円）",
+    title: "パターン別の概算総額（万円・幅で表示）",
     titleColor: NAVY,
     titleFontSize: 13,
     titleFontFace: JP,
     showValue: true,
     dataLabelPosition: "outEnd",
     dataLabelColor: INK,
-    dataLabelFontSize: 12,
+    dataLabelFontSize: 10,
     dataLabelFontFace: JP,
-    dataLabelFormatCode: '0.0"万円"',
-    showLegend: false,
+    showLegend: true,
+    legendPos: "b",
+    legendColor: SLATE,
+    legendFontFace: JP,
+    legendFontSize: 10,
     catAxisLabelColor: INK,
     catAxisLabelFontSize: 11,
     catAxisLabelFontFace: JP,
@@ -584,36 +592,36 @@ function numberBadge(slide, x, y, label, color) {
     valAxisMaxVal: 60,
     valGridLine: { color: "E4E9F4", size: 1 },
     catGridLine: { style: "none" },
-    barGapWidthPct: 60,
+    barGapWidthPct: 40,
   });
 
   const breakdown = [
-    ["① フルオーダー", "ジャケット15,000円×30＝45.0万円\nストラップ500円×50本＝2.5万円", "約47.5万円＋型代・サンプル代", NAVY],
-    ["② 小ロットオーダー", "ジャケット10,000円×30＝30.0万円\nストラップ350円×50本＝1.8万円", "約31.8万円＋サンプル代", "2E5A8C"],
-    ["③ 既製品＋名入れ", "ジャケット5,600円×30＝16.8万円\nストラップ250円×50本＝1.3万円", "約18.1万円", AMBER],
+    ["① フルオーダー", "ジャケット15,000〜18,000円×30＝45.0〜54.0万円\nストラップ232円×50本＝1.2万円", "約46〜55万円＋型代・サンプル代", NAVY],
+    ["② 小ロットオーダー", "ジャケット10,000〜15,000円×30＝30.0〜45.0万円\n※単価は非公開のため仮置き", "約31〜46万円＋サンプル代", "2E5A8C"],
+    ["③ 既製品＋名入れ", "（本体3,000〜8,000円＋刺繍600円）×30＝10.8〜25.8万円\nストラップ232円×50本＝1.2万円", "約12〜27万円", AMBER_D],
   ];
   breakdown.forEach((b, i) => {
     const y = 1.75 + i * 1.6;
     s.addShape(pres.ShapeType.roundRect, {
-      x: 7.9, y, w: 4.8, h: 1.4, rectRadius: 0.06,
+      x: 7.9, y, w: 4.8, h: 1.42, rectRadius: 0.06,
       fill: { color: WHITE }, line: { color: "DDE3F0", width: 1 },
     });
     s.addText(b[0], {
-      x: 8.15, y: y + 0.1, w: 4.3, h: 0.3, isTextBox: true, margin: 0,
+      x: 8.15, y: y + 0.08, w: 4.3, h: 0.3, isTextBox: true, margin: 0,
       fontFace: JP, fontSize: 13, bold: true, color: b[3],
     });
     s.addText(b[1], {
-      x: 8.15, y: y + 0.42, w: 4.3, h: 0.55, isTextBox: true, margin: 0,
-      fontFace: JP, fontSize: 10.5, color: SLATE, lineSpacing: 15,
+      x: 8.15, y: y + 0.4, w: 4.4, h: 0.6, isTextBox: true, margin: 0,
+      fontFace: JP, fontSize: 9.5, color: SLATE, lineSpacing: 14,
     });
     s.addText(b[2], {
-      x: 8.15, y: y + 1.0, w: 4.3, h: 0.3, isTextBox: true, margin: 0,
+      x: 8.15, y: y + 1.03, w: 4.3, h: 0.3, isTextBox: true, margin: 0,
       fontFace: JP, fontSize: 11.5, bold: true, color: INK,
     });
   });
-  s.addText("※ 各社公開情報・業界相場からの目安。ストラップは最小ロットを50本として試算。送料・型代・サンプル代は別途。", {
-    x: 7.9, y: 6.55, w: 4.8, h: 0.5, isTextBox: true, margin: 0,
-    fontFace: JP, fontSize: 9.5, color: SLATE, lineSpacing: 14,
+  s.addText("※ ストラップはHOTSTRAPの昇華フルカラー232円/本（税込）で50本発注した場合。②の単価は非公開のため相場からの仮置き。送料・型代・サンプル代は別途。", {
+    x: 7.9, y: 6.5, w: 4.8, h: 0.6, isTextBox: true, margin: 0,
+    fontFace: JP, fontSize: 9, color: SLATE, lineSpacing: 13,
   });
 }
 
@@ -624,16 +632,16 @@ function numberBadge(slide, x, y, label, color) {
 
   const lanes = [
     { name: "③ 既製品＋名入れ", color: AMBER, steps: [["商品選定・現物確認", 1.9], ["データ入稿", 1.4], ["加工・納品", 1.9]] },
-    { name: "② 小ロットオーダー", color: "2E5A8C", steps: [["ヒアリング・デザイン", 2.6], ["サンプル制作・確認", 3.0], ["量産・納品", 3.4]] },
-    { name: "① フルオーダー", color: NAVY, steps: [["仕様・素材決定", 2.4], ["型・サンプル", 3.2], ["量産・納品", 4.0]] },
+    { name: "② 小ロットオーダー（国内）", color: "2E5A8C", steps: [["ヒアリング・デザイン", 2.6], ["サンプル制作・確認", 3.0], ["量産・納品", 3.4]] },
+    { name: "① フルオーダー", color: NAVY, steps: [["仕様・素材決定", 2.3], ["型・サンプル", 3.1], ["量産・納品", 3.6]] },
   ];
 
-  const x0 = 3.1;
+  const x0 = 3.3;
   lanes.forEach((lane, i) => {
     const y = 2.35 + i * 1.35;
     s.addText(lane.name, {
-      x: 0.6, y: y - 0.02, w: 2.4, h: 0.6, isTextBox: true, margin: 0,
-      fontFace: JP, fontSize: 13, bold: true, color: lane.color, valign: "middle",
+      x: 0.6, y: y - 0.02, w: 2.6, h: 0.6, isTextBox: true, margin: 0,
+      fontFace: JP, fontSize: 12.5, bold: true, color: lane.color, valign: "middle",
     });
     let cx = x0;
     lane.steps.forEach((st, j) => {
@@ -658,12 +666,12 @@ function numberBadge(slide, x, y, label, color) {
   });
 
   s.addShape(pres.ShapeType.roundRect, {
-    x: 0.6, y: 6.15, w: 12.1, h: 0.85, rectRadius: 0.08,
+    x: 0.6, y: 6.05, w: 12.1, h: 1.0, rectRadius: 0.08,
     fill: { color: NAVY }, line: { width: 0 },
   });
-  s.addText("納期は「発注確定後」の期間。実際にはこの前に社内での仕様決定・稟議期間が必要なため、着用希望日から逆算して1ヶ月程度の余裕を見込む。", {
-    x: 0.95, y: 6.15, w: 11.4, h: 0.85, isTextBox: true, margin: 0,
-    fontFace: JP, fontSize: 12, color: ICE, valign: "middle",
+  s.addText("納期は「発注確定後」の期間。海外縫製の場合は6〜8ヶ月、染色工程が入るとさらに+2ヶ月。社内での仕様決定・稟議期間も別途必要なため、着用希望日から1ヶ月以上の余裕を見込む。", {
+    x: 0.95, y: 6.05, w: 11.4, h: 1.0, isTextBox: true, margin: 0,
+    fontFace: JP, fontSize: 12, color: ICE, valign: "middle", lineSpacing: 18,
   });
 }
 
@@ -737,16 +745,63 @@ function numberBadge(slide, x, y, label, color) {
 // ---------- 12. Sources ----------
 {
   const s = pres.addSlide();
+  titleBar(s, "EVIDENCE", "数値の出典と確度（ここが確定・ここは要見積）");
+
+  const rows = [
+    ["JK：最小ロット", "20着〜", "uniform-net.jp/products/small-lot（小ロット専用パターンオーダー）", "A", "2E7D5B"],
+    ["JK：納期", "国内3〜4ヶ月／海外6〜8ヶ月", "uniform-net.jp/faq ＋ kirumirai.com/information/kikan.html", "B", "B0730F"],
+    ["JK：単価（フルオーダー）", "15,000〜18,000円/着", "kirumirai.com/information/price_full_order.html", "B", "B0730F"],
+    ["JK：ロット相場", "国内100着〜／海外300着〜", "nihonhifuku.jp/columns/work-clothes-order-lot-size ＋ kirumirai.com/information/lot.html", "B", "B0730F"],
+    ["JK：既製品＋刺繍", "本体3,000〜8,000円／刺繍220〜660円", "work-king.shop/blog/workwear_low_price ＋ 作業服各社の刺繍加工ページ", "A", "2E7D5B"],
+    ["JK：日本被服工業の条件", "50セット〜・2〜3ヶ月", "掲載ページを特定できず（一次調査メモの数値）→ 要見積", "C", "B3453A"],
+    ["ST：ロット・単価", "1本〜／昇華232円〜・シルク137円〜／10mm100本＝244円", "hotstrap.jp/fullcolor.php ＋ hotstrap.jp/nylon ＋ /order/fullcolor", "A", "2E7D5B"],
+    ["ST：納期", "通常6〜9営業日／特急4〜5営業日", "hotstrap.jp/nylon（納期案内）", "A", "2E7D5B"],
+    ["ST：昇華専門店", "KANARY 30本〜／青山 30〜5,000本・14日目出荷・100円〜", "kanary.jp/.../shoka_neck_price.html ＋ ao-strap.com/largeorder.html", "B", "B0730F"],
+    ["ST：キラメックの条件", "サイト全体で5個〜のみ", "kilamek-novelty.com（ロット・単価・納期の明示なし）→ 要見積", "C", "B3453A"],
+  ];
+
+  const tblRows = [
+    ["項目", "数値", "掲載ページ（確認先）", "確度"].map((h) => ({
+      text: h,
+      options: { fill: NAVY, color: WHITE, bold: true, fontSize: 11.5, fontFace: JP, valign: "middle" },
+    })),
+    ...rows.map((r, ri) => [
+      { text: r[0], options: { fill: ri % 2 === 0 ? WHITE : "F8FAFE", color: NAVY, bold: true, fontSize: 9.5, fontFace: JP, valign: "middle" } },
+      { text: r[1], options: { fill: ri % 2 === 0 ? WHITE : "F8FAFE", color: INK, fontSize: 9.5, fontFace: JP, valign: "middle" } },
+      { text: r[2], options: { fill: ri % 2 === 0 ? WHITE : "F8FAFE", color: SLATE, fontSize: 9, fontFace: JP, valign: "middle" } },
+      { text: r[3], options: { fill: ri % 2 === 0 ? WHITE : "F8FAFE", color: r[4], bold: true, fontSize: 12, fontFace: JP, align: "center", valign: "middle" } },
+    ]),
+  ];
+
+  s.addTable(tblRows, {
+    x: 0.6, y: 1.55, w: 12.1, colW: [2.5, 3.4, 5.3, 0.9],
+    rowH: 0.4,
+    border: { type: "solid", color: "D6DDEE", pt: 1 },
+    margin: 5,
+  });
+
+  s.addShape(pres.ShapeType.roundRect, {
+    x: 0.6, y: 6.55, w: 12.1, h: 0.55, rectRadius: 0.08,
+    fill: { color: "FDF4E4" }, line: { color: "F0DCB8", width: 1 },
+  });
+  s.addText("A＝発注先サイトの該当ページに数値の記載あり／B＝業界メディア・各社コラムに記載の相場値／C＝掲載ページを特定できず＝見積で確定させる項目", {
+    x: 0.95, y: 6.55, w: 11.4, h: 0.55, isTextBox: true, margin: 0,
+    fontFace: JP, fontSize: 10.5, color: "8A5A12", valign: "middle",
+  });
+}
+
+{
+  const s = pres.addSlide();
   titleBar(s, "APPENDIX", "参照した情報源と留意事項");
 
   const rows = [
-    ["ジャケット", "日本被服工業", "オリジナル作業着オーダー制作／セミオーダー", "nihonhifuku.jp"],
-    ["ジャケット", "ユニフォームネット", "小ロット専用パターンオーダー Bechule／20人からの小ロット特集", "uniform-net.jp"],
+    ["ジャケット", "日本被服工業", "オリジナル作業着オーダー制作／発注ロット・価格相場コラム", "nihonhifuku.jp"],
+    ["ジャケット", "ユニフォームネット", "小ロット専用パターンオーダー（20着〜）／納期に関するFAQ", "uniform-net.jp"],
     ["ジャケット", "KIRUMIRAI", "フルオーダー作業着の最小ロット・価格・製作期間の調査記事", "kirumirai.com"],
-    ["ジャケット", "ユニフォームネクスト 他", "既製品への名入れ刺繍・プリント加工、価格相場", "uniformnext.com ほか"],
-    ["ストラップ", "キラメック（キラメックノベルティ）", "法人向けオリジナルネックストラップ、小ロット対応", "kilamek-novelty.com"],
-    ["ストラップ", "HOTSTRAP", "ナイロン／フルカラー昇華の価格・納期、自動見積", "hotstrap.jp"],
-    ["ストラップ", "KANARY／青山ストラップ", "昇華転写ネックストラップの価格表・仕様", "kanary.jp／ao-strap.com"],
+    ["ジャケット", "ワークキング／作業服各社", "既製ブルゾンの価格帯、社名刺繍の加工料金", "work-king.shop ほか"],
+    ["ストラップ", "キラメック（キラメックノベルティ）", "法人向けオリジナルグッズ、小ロット5個〜の案内", "kilamek-novelty.com"],
+    ["ストラップ", "HOTSTRAP", "ナイロン／フルカラー昇華の単価・納期、自動見積", "hotstrap.jp"],
+    ["ストラップ", "KANARY／青山ストラップ", "昇華転写ネックストラップの価格ページ、量産日数", "kanary.jp／ao-strap.com"],
   ];
 
   const tblRows = [
@@ -778,10 +833,11 @@ function numberBadge(slide, x, y, label, color) {
     x: 0.6, y: 5.95, w: 12.1, h: 1.0, rectRadius: 0.08,
     fill: { color: "FDF4E4" }, line: { color: "F0DCB8", width: 1 },
   });
-  s.addText("留意事項：本資料の価格・納期・ロットはいずれも2026年9月時点の各社公開情報および業界相場から整理した「目安」です。仕様や数量、時期によって変動するため、発注判断の前に各社へ同一条件での正式見積を依頼してください。", {
+  s.addText("留意事項：本資料の数値は2026年9月時点で各社サイト・業界メディアに公開されている情報を整理したものです。ページの記載は改定されることがあり、また非公開の項目（①の価格・ロット・納期、②の単価、キラメックの条件）は見積でのみ確定します。発注判断の前に、各社へ同一条件での正式見積を依頼してください。", {
     x: 0.95, y: 5.95, w: 11.4, h: 1.0, isTextBox: true, margin: 0,
-    fontFace: JP, fontSize: 12, color: "8A5A12", valign: "middle", lineSpacing: 19,
+    fontFace: JP, fontSize: 11.5, color: "8A5A12", valign: "middle", lineSpacing: 18,
   });
 }
+
 
 pres.writeFile({ fileName: "工場ユニフォーム検討資料.pptx" }).then((f) => console.log("wrote", f));
